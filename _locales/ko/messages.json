@@ -1,0 +1,10 @@
+{
+   "extDescription": {
+      "description": "확장 프로그램 설명",
+      "message": "대화 턴 간 이동, 성능 모니터링, 스마트 메모리 정리, ChatGPT를 TXT/MD/PDF/Word로 내보내기."
+   },
+   "extName": {
+      "description": "확장 프로그램 이름",
+      "message": "Rel.AI Companion"
+   }
+}

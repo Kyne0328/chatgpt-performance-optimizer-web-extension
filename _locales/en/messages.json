@@ -1,0 +1,19 @@
+{
+  "exportConversation": {"description":"Export section title","message":"Export Conversation"},
+  "exportError": {"description":"Export error message","message":"Export failed. Try again."},
+  "exporting": {"description":"Exporting state for buttons","message":"..."},
+  "extDescription": {"description":"Extension description","message":"Navigate conversations, optimize ChatGPT performance, manage privacy controls, and export chats to TXT/MD/PDF/Word/JSON."},
+  "extName": {"description":"Extension name","message":"Rel.AI Companion"},
+  "hideNotifications": {"description":"Notification toggle label","message":"Hide Banners & Popups"},
+  "hideNotificationsDesc": {"description":"Notification toggle description","message":"Block ChatGPT update alerts and announcements"},
+  "memorySaved": {"description":"Memory stat card label","message":"Memory Saved"},
+  "messagesLabel": {"description":"Messages stat card label","message":"Messages"},
+  "noMessages": {"description":"Empty conversation message","message":"No messages found to export."},
+  "openChatGPT": {"description":"Shown when not on ChatGPT page","message":"Open ChatGPT to see stats"},
+  "renderWindow": {"description":"Slider label","message":"Render window: $COUNT$ messages","placeholders":{"count":{"content":"$1","example":"30"}}},
+  "selSelected": {"description":"Selected messages count","message":"$COUNT$ selected","placeholders":{"count":{"content":"$1","example":"3"}}},
+  "selectionMode": {"description":"Selection mode toggle label","message":"Selection Mode"},
+  "selectionModeDesc": {"description":"Selection mode description","message":"Choose specific messages to export"},
+  "speedBooster": {"description":"Main toggle label","message":"Clean Memory"},
+  "speedBoosterDesc": {"description":"Clean Memory description","message":"Reload fresh when switching chats to free memory"}
+}

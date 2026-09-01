@@ -1,0 +1,10 @@
+{
+   "extDescription": {
+      "description": "扩展程序描述",
+      "message": "在对话轮次间跳转、监控性能、智能清理内存，并将 ChatGPT 导出为 TXT/MD/PDF/Word。"
+   },
+   "extName": {
+      "description": "扩展程序名称",
+      "message": "Rel.AI Companion"
+   }
+}

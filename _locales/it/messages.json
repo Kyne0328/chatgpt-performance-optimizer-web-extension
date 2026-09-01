@@ -1,0 +1,10 @@
+{
+   "extDescription": {
+      "description": "Descrizione dell'estensione",
+      "message": "Salta tra i turni, monitora le prestazioni, libera memoria ed esporta ChatGPT in TXT/MD/PDF/Word."
+   },
+   "extName": {
+      "description": "Nome dell'estensione",
+      "message": "Rel.AI Companion"
+   }
+}

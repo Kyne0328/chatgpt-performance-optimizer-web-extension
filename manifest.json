@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extName__",
+  "description": "__MSG_extDescription__",
+  "version": "1.0.0",
+  "author": "Kyne0328",
+  "homepage_url": "https://github.com/Kyne0328/chatgpt-performance-optimizer-web-extension",
+  "default_locale": "en",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "css": ["content.css"],
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+      "run_at": "document_start"
+    },
+    {
+      "js": ["shared/i18n-data.js", "content.js"],
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+      "run_at": "document_end"
+    }
+  ],
+  "host_permissions": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+  "optional_host_permissions": [
+    "*://*.browser-intake-datadoghq.com/*",
+    "*://*.datadoghq.com/*",
+    "*://*.google-analytics.com/*",
+    "*://*.doubleclick.net/*"
+  ],
+  "permissions": ["storage", "activeTab", "downloads", "declarativeNetRequestWithHostAccess"],
+  "web_accessible_resources": [
+    {
+      "matches": ["<all_urls>"],
+      "resources": ["main-world.js"]
+    }
+  ]
+}

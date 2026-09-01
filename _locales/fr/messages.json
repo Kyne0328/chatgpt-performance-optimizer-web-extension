@@ -1,0 +1,10 @@
+{
+   "extDescription": {
+      "description": "Description de l'extension",
+      "message": "Passez d'un tour à l'autre, suivez les performances, nettoyez la mémoire et exportez en TXT/MD/PDF/Word."
+   },
+   "extName": {
+      "description": "Nom de l'extension",
+      "message": "Rel.AI Companion"
+   }
+}

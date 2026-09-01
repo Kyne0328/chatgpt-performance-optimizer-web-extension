@@ -1,0 +1,10 @@
+{
+   "extDescription": {
+      "description": "拡張機能の説明",
+      "message": "会話を移動、パフォーマンスを監視、メモリをスマートに解放し、ChatGPTをTXT/MD/PDF/Wordにエクスポート。"
+   },
+   "extName": {
+      "description": "拡張機能の名前",
+      "message": "Rel.AI Companion"
+   }
+}
