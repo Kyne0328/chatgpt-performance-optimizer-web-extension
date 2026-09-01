@@ -20,7 +20,6 @@
     navigatorEnabled: true,
     hudEnabled: false,
     cleanMemorySmart: false,
-    collapseCode: false,
     hideThinking: false,
     clickToLoadImg: false,
     prefetchNav: false,

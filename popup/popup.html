@@ -30,7 +30,7 @@
       <section class="summary" id="summarySection" aria-label="Conversation status" hidden>
         <div class="summary-item"><span>Messages</span><strong id="statTotal">--</strong></div>
         <div class="summary-item"><span>Rendered</span><strong id="statRendered">--</strong></div>
-        <div class="summary-item"><span>Clean Memory</span><strong id="statMemory">--</strong></div>
+        <div class="summary-item"><span>Memory Reset</span><strong id="statMemory">--</strong></div>
         <span id="statsRow" hidden></span>
         <span id="noStats" hidden></span>
         <div class="last-clean" id="lastCleanStat" hidden>Last cleanup <strong id="lastCleanValue">—</strong></div>
@@ -43,23 +43,19 @@
         </div>
         <div class="row-list">
           <button class="setting-row" type="button" data-pref="cleanMemoryEnabled">
-            <span class="setting-copy"><strong>Clean Memory</strong><small>Start fresh when switching conversations to release accumulated tab memory.</small></span>
+            <span class="setting-copy"><strong>Memory Reset</strong><small>Reload ChatGPT when changing conversations to release accumulated tab memory.</small></span>
             <span class="switch" data-state-label>On</span>
           </button>
           <button class="setting-row" type="button" data-pref="cleanMemorySmart">
-            <span class="setting-copy"><strong>Smart Clean</strong><small>Only reload when the current session appears memory-heavy.</small></span>
+            <span class="setting-copy"><strong>Auto Memory Reset</strong><small>Only reset when the current ChatGPT tab appears memory-heavy.</small></span>
             <span class="switch" data-state-label>Off</span>
           </button>
           <button class="setting-row" type="button" data-pref="navigatorEnabled">
-            <span class="setting-copy"><strong>Turn Navigator</strong><small>Add a compact jump control for long conversations.</small></span>
+            <span class="setting-copy"><strong>Conversation Navigator</strong><small>Use a slim conversation rail to move between your prompts.</small></span>
             <span class="switch" data-state-label>On</span>
           </button>
           <button class="setting-row" type="button" data-pref="hideNotifications">
             <span class="setting-copy"><strong>Quiet Mode</strong><small>Hide ChatGPT banners, notices, and announcement popups.</small></span>
-            <span class="switch" data-state-label>Off</span>
-          </button>
-          <button class="setting-row" type="button" data-pref="collapseCode">
-            <span class="setting-copy"><strong>Collapse Long Code</strong><small>Fold tall code blocks until you choose to expand them.</small></span>
             <span class="switch" data-state-label>Off</span>
           </button>
         </div>
@@ -105,16 +101,16 @@
         </div>
         <div class="row-list">
           <button class="setting-row" type="button" data-pref="perfBlockTrackers">
-            <span class="setting-copy"><strong>Remove Tracker Elements</strong><small>Remove known analytics elements after they appear on the page.</small></span>
+            <span class="setting-copy"><strong>Page Tracking Cleanup</strong><small>Remove known analytics elements after they appear on the page.</small></span>
             <span class="switch" data-state-label>Off</span>
           </button>
           <button class="setting-row" id="trackerToggle" type="button" data-special="tracker">
-            <span class="setting-copy"><strong>Block Tracker Requests</strong><small>Use browser network rules for selected analytics domains.</small></span>
+            <span class="setting-copy"><strong>Network Privacy</strong><small>Use browser network rules to block selected analytics domains.</small></span>
             <span class="switch" data-state-label>Off</span>
           </button>
           <p class="inline-message" id="trackerMsg" role="status" aria-live="polite" hidden></p>
           <button class="setting-row" type="button" data-pref="perfKeepSession">
-            <span class="setting-copy"><strong>Keep Session Active</strong><small>Periodically refresh ChatGPT session state in the background.</small></span>
+            <span class="setting-copy"><strong>Session Keepalive</strong><small>Periodically refresh ChatGPT session state while this option is enabled.</small></span>
             <span class="switch" data-state-label>Off</span>
           </button>
         </div>
@@ -127,19 +123,19 @@
         </summary>
         <div class="details-body row-list">
           <button class="setting-row" type="button" data-pref="hudEnabled">
-            <span class="setting-copy"><strong>Performance Monitor</strong><small>Show memory, DOM, and responsiveness data in ChatGPT.</small></span>
+            <span class="setting-copy"><strong>Session Stats</strong><small>Show a compact memory chip; open it for live session metrics.</small></span>
             <span class="switch" data-state-label>Off</span>
           </button>
           <button class="setting-row" type="button" data-pref="hideThinking">
-            <span class="setting-copy"><strong>Hide Reasoning Rows</strong><small>Hide standalone reasoning rows when they can be detected.</small></span>
+            <span class="setting-copy"><strong>Hide Reasoning</strong><small>Hide standalone reasoning rows when they can be detected.</small></span>
             <span class="switch" data-state-label>Off</span>
           </button>
           <button class="setting-row" type="button" data-pref="clickToLoadImg">
-            <span class="setting-copy"><strong>Load Images on Click</strong><small>Delay off-screen images until you request them.</small></span>
+            <span class="setting-copy"><strong>Manual Images</strong><small>Keep off-screen images unloaded until you choose to view them.</small></span>
             <span class="switch" data-state-label>Off</span>
           </button>
           <button class="setting-row" type="button" data-pref="prefetchNav">
-            <span class="setting-copy"><strong>Preload Chats on Hover</strong><small>Ask Chromium to prepare a conversation before you open it.</small></span>
+            <span class="setting-copy"><strong>Quick Open</strong><small>Ask Chromium to prepare conversations when you hover over them.</small></span>
             <span class="switch" data-state-label>Off</span>
           </button>
         </div>

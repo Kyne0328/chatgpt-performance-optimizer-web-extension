@@ -6,8 +6,8 @@ Version **1.0.0** is maintained by **Kyne0328**.
 
 ## Features
 
-- Clean Memory mode for long ChatGPT sessions
-- Turn Navigator and optional performance monitor
+- Memory Reset controls for long ChatGPT sessions
+- Conversation Navigator rail and optional Session Stats chip
 - Image, animation, DOM, media, and resource-loading controls
 - Optional page-level and network-level tracker blocking
 - Settings backup/restore and local diagnostics

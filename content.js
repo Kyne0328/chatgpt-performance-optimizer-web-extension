@@ -1031,16 +1031,8 @@
         blocks.push({ lang: langMatch ? langMatch[1] : '', code: code.textContent });
         return;
       }
-      // Plain <pre> without <code> — still capture its text, excluding any
-      // collapse toggle button we may have injected into it.
-      let txt;
-      if (pre.querySelector(':scope > .relai-code-toggle')) {
-        const c = pre.cloneNode(true);
-        c.querySelector('.relai-code-toggle')?.remove();
-        txt = c.textContent;
-      } else {
-        txt = pre.textContent;
-      }
+      // Plain <pre> without <code> — still capture its text.
+      const txt = pre.textContent;
       if (txt && txt.trim()) blocks.push({ lang: '', code: txt });
     });
     return blocks;
@@ -1451,31 +1443,43 @@
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // Tools & Widgets — Turn Navigator, Performance HUD, Smart Clean
-  // Memory, Collapse Code, Hide Thinking, Click-to-load Images, Prefetch.
+  // Tools & Widgets — Conversation Navigator, Session Stats, Smart Clean,
+  // Hide Thinking, Manual Images, and Quick Open.
   // All tools are available to every user; heavier options remain opt-in.
   // ══════════════════════════════════════════════════════════════════
 
   const TOOL_DEFAULTS = {
-    navigatorEnabled: true,   // Turn Navigator, default ON
-    hudEnabled: false,        // Performance HUD
-    cleanMemorySmart: false,  // smart Clean Memory (read live in interceptChatLinks)
-    collapseCode: false,      // collapse tall code blocks
+    navigatorEnabled: true,   // Conversation Navigator, default ON
+    hudEnabled: false,        // Session Stats chip
+    cleanMemorySmart: false,  // smart memory reset (read live in interceptChatLinks)
     hideThinking: false,      // hide reasoning-only rows
-    clickToLoadImg: false,    // load off-screen images on demand
-    prefetchNav: false        // Chrome-only — Speculation Rules on hover
+    clickToLoadImg: false,    // Manual Images
+    prefetchNav: false        // Quick Open; Chrome Speculation Rules on hover
     // blockTrackersNet is handled by background (DNR) — no content-side effect.
   };
   const TOOL_KEYS = Object.keys(TOOL_DEFAULTS);
   let toolPrefs = { ...TOOL_DEFAULTS };
 
   // Effective on/off state for features driven by the shared scan.
-  const toolActive = { navigator: false, collapseCode: false, hideThinking: false, clickToLoadImg: false };
+  const toolActive = { navigator: false, hideThinking: false, clickToLoadImg: false };
 
   // ── Small helpers ─────────────────────────────────────────────────
   const mb = (bytes) => Math.round((bytes || 0) / (1024 * 1024));
-  function ssGet(k) { try { return sessionStorage.getItem(k); } catch (_) { return null; } }
-  function ssSet(k, v) { try { sessionStorage.setItem(k, v); } catch (_) {} }
+  function pageUsesLightTheme() {
+    const candidates = [document.querySelector('main'), document.body, document.documentElement].filter(Boolean);
+    for (const el of candidates) {
+      try {
+        const match = getComputedStyle(el).backgroundColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/i);
+        if (!match || (match[4] !== undefined && Number(match[4]) < 0.1)) continue;
+        const [r, g, b] = [Number(match[1]), Number(match[2]), Number(match[3])];
+        return ((0.2126 * r) + (0.7152 * g) + (0.0722 * b)) > 150;
+      } catch (_) {}
+    }
+    return false;
+  }
+  function syncInjectedTheme(el) {
+    if (el) el.classList.toggle('relai-light', pageUsesLightTheme());
+  }
 
   // The per-turn wrapper: in the current DOM each <section> turn lives inside a
   // [data-turn-id-container] wrapper DIV that keeps its height even when the turn
@@ -1509,7 +1513,7 @@
 
   // ── Shared feature-scan observer ──────────────────────────────────
   // A SINGLE MutationObserver drives every DOM-scanning tool (Navigator refresh,
-  // Collapse Code, Hide Thinking, Click-to-load Images) so we never stack up one
+  // Hide Thinking and Manual Images) so we never stack up one
   // observer per feature. Passes are debounced (1s) with a 3s starvation cap so
   // continuous streaming mutations can't starve a scan forever.
   let toolScanObs = null;
@@ -1517,8 +1521,7 @@
   let toolScanLastRun = 0;
 
   function toolScanNeeded() {
-    return toolActive.navigator || toolActive.collapseCode
-        || toolActive.hideThinking || toolActive.clickToLoadImg;
+    return toolActive.navigator || toolActive.hideThinking || toolActive.clickToLoadImg;
   }
   function scheduleToolScan() {
     clearTimeout(toolScanDebounce);
@@ -1529,7 +1532,6 @@
     toolScanLastRun = Date.now();
     if (toolActive.navigator) refreshNavigator();
     if (toolActive.hideThinking) scanHideThinking();
-    if (toolActive.collapseCode) scanCollapseCode();
     if (toolActive.clickToLoadImg) scanClickToLoadImg();
   }
   function updateToolScanObserver() {
@@ -1550,8 +1552,7 @@
   function applyToolFeatures() {
     const eff = (key) => toolPrefs[key];
     applyNavigator(eff('navigatorEnabled'));
-    applyHud(eff('hudEnabled'));
-    applyCollapseCode(eff('collapseCode'));
+    applySessionStats(eff('hudEnabled'));
     applyHideThinking(eff('hideThinking'));
     applyClickToLoadImg(eff('clickToLoadImg'));
     applyPrefetch(eff('prefetchNav'));
@@ -1566,11 +1567,12 @@
     if (toolScanNeeded()) runToolScan();
   }
 
-  // ── Turn Navigator ────────────────────────────────────────────────
+  // ── Conversation Navigator ────────────────────────────────────────
   let navWidget = null;
   let navScrollHandler = null;
   let navScrollTarget = null;
   let navScrollThrottle = null;
+  let navDragging = false;
 
   function getUserTurns() {
     // data-turn="user" persists on the <section> even when virtualized.
@@ -1582,46 +1584,85 @@
     navWidget = document.createElement('div');
     navWidget.id = 'relai-nav';
     navWidget.className = 'relai-nav';
+    navWidget.tabIndex = 0;
+    navWidget.setAttribute('role', 'slider');
+    navWidget.setAttribute('aria-label', t('turnNavigator'));
+    navWidget.setAttribute('aria-orientation', 'vertical');
+    syncInjectedTheme(navWidget);
     navWidget.innerHTML =
-      '<button type="button" class="relai-nav-btn" data-act="first">⤒</button>' +
-      '<button type="button" class="relai-nav-btn" data-act="prev">↑</button>' +
-      '<span class="relai-nav-count">0/0</span>' +
-      '<button type="button" class="relai-nav-btn" data-act="next">↓</button>' +
-      '<button type="button" class="relai-nav-btn" data-act="last">⤓</button>';
-    navWidget.querySelector('[data-act="first"]').title = t('navFirst');
-    navWidget.querySelector('[data-act="prev"]').title = t('navPrevUser');
-    navWidget.querySelector('[data-act="next"]').title = t('navNextUser');
-    navWidget.querySelector('[data-act="last"]').title = t('navLast');
-    navWidget.addEventListener('click', onNavClick);
+      '<div class="relai-nav-track" aria-hidden="true">' +
+        '<span class="relai-nav-progress"></span>' +
+        '<span class="relai-nav-thumb"></span>' +
+      '</div>' +
+      '<span class="relai-nav-count" aria-hidden="true">1 / 1</span>';
+    navWidget.addEventListener('pointerdown', onNavPointerDown);
+    navWidget.addEventListener('pointermove', onNavPointerMove);
+    navWidget.addEventListener('pointerup', onNavPointerUp);
+    navWidget.addEventListener('pointercancel', onNavPointerUp);
+    navWidget.addEventListener('keydown', onNavKeyDown);
     (document.body || document.documentElement).appendChild(navWidget);
   }
   function removeNavigator() {
+    navDragging = false;
     if (navWidget) { navWidget.remove(); navWidget = null; }
   }
-  function onNavClick(e) {
-    const btn = e.target.closest('.relai-nav-btn');
-    if (!btn) return;
+  function navIndexFromClientY(clientY, users) {
+    if (!navWidget || !users.length) return 0;
+    const track = navWidget.querySelector('.relai-nav-track');
+    if (!track) return 0;
+    const rect = track.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (clientY - rect.top) / Math.max(1, rect.height)));
+    return Math.round(ratio * (users.length - 1));
+  }
+  function jumpToUserIndex(index, users) {
+    if (!users.length) return;
+    const next = Math.max(0, Math.min(users.length - 1, index));
+    scrollToTurnWrapper(users[next]);
+    setNavPosition(next, users.length);
+  }
+  function onNavPointerDown(e) {
+    if (e.button !== 0) return;
+    const users = getUserTurns();
+    if (users.length < 2) return;
     e.preventDefault();
     e.stopPropagation();
-    const act = btn.getAttribute('data-act');
-    const all = getTurns();
-    if (act === 'first') { scrollToTurnWrapper(all[0]); return; }
-    if (act === 'last') { scrollToTurnWrapper(all[all.length - 1]); return; }
+    navDragging = true;
+    navWidget.classList.add('relai-nav-dragging');
+    try { navWidget.setPointerCapture(e.pointerId); } catch (_) {}
+    jumpToUserIndex(navIndexFromClientY(e.clientY, users), users);
+  }
+  function onNavPointerMove(e) {
+    if (!navDragging) return;
+    e.preventDefault();
     const users = getUserTurns();
-    if (!users.length) return;
-    let idx = currentUserIndex(users);
-    if (act === 'prev') idx = Math.max(0, idx - 1);
-    else if (act === 'next') idx = Math.min(users.length - 1, idx + 1);
-    scrollToTurnWrapper(users[idx]);
-    setNavCount(idx + 1, users.length);
+    jumpToUserIndex(navIndexFromClientY(e.clientY, users), users);
+  }
+  function onNavPointerUp(e) {
+    if (!navDragging) return;
+    navDragging = false;
+    navWidget?.classList.remove('relai-nav-dragging');
+    try { navWidget?.releasePointerCapture(e.pointerId); } catch (_) {}
+  }
+  function onNavKeyDown(e) {
+    const users = getUserTurns();
+    if (users.length < 2) return;
+    let next = currentUserIndex(users);
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') next -= 1;
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next += 1;
+    else if (e.key === 'PageUp') next -= 5;
+    else if (e.key === 'PageDown') next += 5;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = users.length - 1;
+    else return;
+    e.preventDefault();
+    jumpToUserIndex(next, users);
   }
   function scrollToTurnWrapper(turn) {
     if (!turn) return;
-    // Scroll the WRAPPER — it keeps its height even when the turn is virtualized.
     getTurnWrapper(turn).scrollIntoView({ block: 'start' });
   }
   // Index of the last user turn whose wrapper top is at/above 80px below the
-  // scroller's top edge (i.e. the one currently "in view").
+  // scroller's top edge (i.e. the one currently in view).
   function currentUserIndex(users) {
     const sc = scrollContainer || findScrollContainer(users[0]);
     const scTop = sc ? sc.getBoundingClientRect().top : 0;
@@ -1633,16 +1674,31 @@
     }
     return idx;
   }
-  function setNavCount(n, total) {
-    const c = navWidget && navWidget.querySelector('.relai-nav-count');
-    if (c) c.textContent = n + '/' + total;
+  function setNavPosition(index, total) {
+    if (!navWidget || total < 1) return;
+    const ratio = total > 1 ? index / (total - 1) : 0;
+    const pct = Math.round(ratio * 10000) / 100;
+    const count = navWidget.querySelector('.relai-nav-count');
+    const progress = navWidget.querySelector('.relai-nav-progress');
+    const thumb = navWidget.querySelector('.relai-nav-thumb');
+    if (count) {
+      count.textContent = (index + 1) + ' / ' + total;
+      count.style.top = Math.max(7, Math.min(93, pct)) + '%';
+    }
+    if (progress) progress.style.height = pct + '%';
+    if (thumb) thumb.style.top = pct + '%';
+    navWidget.setAttribute('aria-valuemin', '1');
+    navWidget.setAttribute('aria-valuemax', String(total));
+    navWidget.setAttribute('aria-valuenow', String(index + 1));
+    navWidget.setAttribute('aria-valuetext', (index + 1) + ' of ' + total);
   }
   function refreshNavigator() {
     if (!navWidget) return;
+    syncInjectedTheme(navWidget);
     const users = getUserTurns();
     if (users.length < 2) { navWidget.style.display = 'none'; return; }
     navWidget.style.display = '';
-    setNavCount(currentUserIndex(users) + 1, users.length);
+    setNavPosition(currentUserIndex(users), users.length);
   }
   function attachNavScroll() {
     detachNavScroll();
@@ -1654,15 +1710,13 @@
       navScrollThrottle = setTimeout(() => {
         navScrollThrottle = null;
         const users = getUserTurns();
-        if (users.length >= 2) setNavCount(currentUserIndex(users) + 1, users.length);
-      }, 500);
+        if (users.length >= 2) setNavPosition(currentUserIndex(users), users.length);
+      }, 250);
     };
     sc.addEventListener('scroll', navScrollHandler, { passive: true });
   }
   function detachNavScroll() {
-    if (navScrollTarget && navScrollHandler) {
-      navScrollTarget.removeEventListener('scroll', navScrollHandler);
-    }
+    if (navScrollTarget && navScrollHandler) navScrollTarget.removeEventListener('scroll', navScrollHandler);
     navScrollHandler = null;
     navScrollTarget = null;
     if (navScrollThrottle) { clearTimeout(navScrollThrottle); navScrollThrottle = null; }
@@ -1673,160 +1727,182 @@
     else { detachNavScroll(); removeNavigator(); }
   }
 
-  // ── F2. Performance HUD ───────────────────────────────────────────
-  let hudEl = null;
-  let hudTimer = null;
-  let hudVisHandler = null;
-  let hudRafId = null;
-  let hudFrameCount = 0;
-  let hudFps = 0;
-  let hudFpsWindowStart = 0;
-  let hudLongTaskObs = null;
-  let hudLongTasks = []; // { t, dur } within the last 5s
+  // ── Session Stats ─────────────────────────────────────────────────
+  let sessionStatsEl = null;
+  let sessionStatsTimer = null;
+  let sessionStatsVisHandler = null;
+  let sessionStatsDocHandler = null;
+  let sessionRafId = null;
+  let sessionFrameCount = 0;
+  let sessionFps = 0;
+  let sessionFpsWindowStart = 0;
+  let sessionLongTaskObs = null;
+  let sessionLongTasks = [];
 
-  function ensureHud() {
-    if (hudEl) return;
-    const collapsed = ssGet('relaiHudCollapsed') === '1';
-    hudEl = document.createElement('div');
-    hudEl.id = 'relai-hud';
-    hudEl.className = 'relai-hud' + (collapsed ? ' relai-hud-collapsed' : '');
-    // Static literal only (web-ext UNSAFE_VAR_ASSIGNMENT); dynamic char below.
-    hudEl.innerHTML =
-      '<div class="relai-hud-head">' +
-        '<span class="relai-hud-title">⚡</span>' +
-        '<button type="button" class="relai-hud-min">–</button>' +
-      '</div><div class="relai-hud-body"></div>';
-    hudEl.querySelector('.relai-hud-min').textContent = collapsed ? '▢' : '–';
+  function ensureSessionStats() {
+    if (sessionStatsEl) return;
+    sessionStatsEl = document.createElement('div');
+    sessionStatsEl.id = 'relai-session-stats';
+    sessionStatsEl.className = 'relai-session-stats';
+    syncInjectedTheme(sessionStatsEl);
+    sessionStatsEl.innerHTML =
+      '<button type="button" class="relai-session-chip" aria-expanded="false"></button>' +
+      '<div class="relai-session-popover" hidden>' +
+        '<div class="relai-session-title"></div>' +
+        '<div class="relai-session-rows"></div>' +
+      '</div>';
+    sessionStatsEl.querySelector('.relai-session-title').textContent = t('perfHud');
     const rows = [
-      ['mem', t('hudMemory'), false],
-      ['nodes', t('hudNodes'), false],
-      ['turns', t('hudTurns'), false],
-      ['fps', t('hudFps'), true],
-      ['lag', t('hudLag'), true],
-      ['clean', t('hudLastClean'), true]
+      ['mem', t('hudMemory')],
+      ['nodes', t('hudNodes')],
+      ['turns', t('hudTurns')],
+      ['fps', t('hudFps')],
+      ['lag', t('hudLag')],
+      ['clean', t('hudLastClean')]
     ];
-    const body = hudEl.querySelector('.relai-hud-body');
+    const body = sessionStatsEl.querySelector('.relai-session-rows');
     for (const [id, label] of rows) {
       const row = document.createElement('div');
-      row.className = 'relai-hud-row';
+      row.className = 'relai-session-row';
       row.dataset.row = id;
-      row.innerHTML = '<span class="relai-hud-k"></span><span class="relai-hud-v">—</span>';
-      row.querySelector('.relai-hud-k').textContent = label;
+      row.innerHTML = '<span class="relai-session-key"></span><span class="relai-session-value">—</span>';
+      row.querySelector('.relai-session-key').textContent = label;
       body.appendChild(row);
     }
-    hudEl.querySelector('.relai-hud-min').addEventListener('click', (e) => {
+    const chip = sessionStatsEl.querySelector('.relai-session-chip');
+    chip.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const isCol = hudEl.classList.toggle('relai-hud-collapsed');
-      ssSet('relaiHudCollapsed', isCol ? '1' : '0');
-      e.currentTarget.textContent = isCol ? '▢' : '–';
-      if (!isCol) updateHud();
+      setSessionStatsOpen(chip.getAttribute('aria-expanded') !== 'true');
     });
-    (document.body || document.documentElement).appendChild(hudEl);
-  }
-  function updateHud() {
-    if (!hudEl || hudEl.classList.contains('relai-hud-collapsed')) return;
-    if (document.visibilityState !== 'visible') return;
-    const setRow = (id, value, show) => {
-      const row = hudEl.querySelector('.relai-hud-row[data-row="' + id + '"]');
-      if (!row) return;
-      row.style.display = show ? '' : 'none';
-      if (show) row.querySelector('.relai-hud-v').textContent = value;
+    sessionStatsDocHandler = (e) => {
+      if (sessionStatsEl && !sessionStatsEl.contains(e.target)) setSessionStatsOpen(false);
     };
-    const mem = performance.memory;
-    setRow('mem', mem ? (mb(mem.usedJSHeapSize) + ' / ' + mb(mem.totalJSHeapSize) + ' MB') : '', !!mem);
-    // Cheap counts only — no getBoundingClientRect per turn on the HUD tick.
-    setRow('nodes', String(document.getElementsByTagName('*').length), true);
-    const total = getTurns().length;
-    const mounted = document.querySelectorAll(TURN_SELECTOR + ' [data-message-author-role]').length;
-    setRow('turns', mounted + ' / ' + total, true);
-    setRow('fps', String(hudFps), true);
-    // Browsers without 'longtask' support (e.g. Firefox) can't measure Lag —
-    // hide the row there instead of showing a permanent, misleading 0 ms.
-    setRow('lag', currentLag() + ' ms', longTaskSupported());
-    const cleanRow = hudEl.querySelector('.relai-hud-row[data-row="clean"]');
-    if (cleanRow) {
-      cleanRow.style.display = '';
-      chrome.storage.local.get(['relaiCleanStats'], (d) => {
-        const s = d && d.relaiCleanStats;
-        const v = cleanRow.querySelector('.relai-hud-v');
-        if (v) v.textContent = (s && s.before && s.after) ? (mb(s.before) + '→' + mb(s.after) + ' MB') : '—';
-      });
+    document.addEventListener('pointerdown', sessionStatsDocHandler, true);
+    document.addEventListener('keydown', onSessionStatsKeyDown, true);
+    (document.body || document.documentElement).appendChild(sessionStatsEl);
+  }
+  function onSessionStatsKeyDown(e) {
+    if (e.key === 'Escape') setSessionStatsOpen(false);
+  }
+  function setSessionStatsOpen(open) {
+    if (!sessionStatsEl) return;
+    const chip = sessionStatsEl.querySelector('.relai-session-chip');
+    const panel = sessionStatsEl.querySelector('.relai-session-popover');
+    if (!chip || !panel) return;
+    panel.hidden = !open;
+    chip.setAttribute('aria-expanded', String(open));
+    if (open) {
+      startSessionFpsCounter();
+      startSessionLongTaskObserver();
+      updateSessionStats();
+    } else {
+      stopSessionFpsCounter();
+      stopSessionLongTaskObserver();
     }
   }
-  function startHudTimer() {
-    stopHudTimer();
-    hudTimer = setInterval(() => {
-      if (document.visibilityState === 'visible') updateHud();
-    }, 2000);
-    hudVisHandler = () => { if (document.visibilityState === 'visible') updateHud(); };
-    document.addEventListener('visibilitychange', hudVisHandler);
-    updateHud();
+  function setSessionRow(id, value, show = true) {
+    const row = sessionStatsEl?.querySelector('.relai-session-row[data-row="' + id + '"]');
+    if (!row) return;
+    row.style.display = show ? '' : 'none';
+    if (show) row.querySelector('.relai-session-value').textContent = value;
   }
-  function stopHudTimer() {
-    if (hudTimer) { clearInterval(hudTimer); hudTimer = null; }
-    if (hudVisHandler) { document.removeEventListener('visibilitychange', hudVisHandler); hudVisHandler = null; }
+  function updateSessionStats() {
+    if (!sessionStatsEl || document.visibilityState !== 'visible') return;
+    syncInjectedTheme(sessionStatsEl);
+    const mem = performance.memory;
+    const chip = sessionStatsEl.querySelector('.relai-session-chip');
+    if (chip) chip.textContent = mem ? (t('hudMemory') + ' ' + mb(mem.usedJSHeapSize) + ' MB') : t('perfHud');
+    const panel = sessionStatsEl.querySelector('.relai-session-popover');
+    if (!panel || panel.hidden) return;
+    setSessionRow('mem', mem ? (mb(mem.usedJSHeapSize) + ' / ' + mb(mem.totalJSHeapSize) + ' MB') : '', !!mem);
+    setSessionRow('nodes', String(document.getElementsByTagName('*').length));
+    const total = getTurns().length;
+    const mounted = document.querySelectorAll(TURN_SELECTOR + ' [data-message-author-role]').length;
+    setSessionRow('turns', mounted + ' / ' + total);
+    setSessionRow('fps', String(sessionFps));
+    setSessionRow('lag', currentSessionLag() + ' ms', longTaskSupported());
+    chrome.storage.local.get(['relaiCleanStats'], (d) => {
+      const s = d && d.relaiCleanStats;
+      setSessionRow('clean', (s && s.before && s.after) ? (mb(s.before) + ' → ' + mb(s.after) + ' MB') : '—');
+    });
   }
-  function startFpsCounter() {
-    if (hudRafId) return;
-    hudFrameCount = 0;
-    hudFpsWindowStart = performance.now();
+  function startSessionStatsTimer() {
+    stopSessionStatsTimer();
+    sessionStatsTimer = setInterval(updateSessionStats, 2500);
+    sessionStatsVisHandler = () => { if (document.visibilityState === 'visible') updateSessionStats(); };
+    document.addEventListener('visibilitychange', sessionStatsVisHandler);
+    updateSessionStats();
+  }
+  function stopSessionStatsTimer() {
+    if (sessionStatsTimer) { clearInterval(sessionStatsTimer); sessionStatsTimer = null; }
+    if (sessionStatsVisHandler) {
+      document.removeEventListener('visibilitychange', sessionStatsVisHandler);
+      sessionStatsVisHandler = null;
+    }
+  }
+  function startSessionFpsCounter() {
+    if (sessionRafId) return;
+    sessionFrameCount = 0;
+    sessionFpsWindowStart = performance.now();
     const loop = () => {
-      hudFrameCount++;
+      sessionFrameCount++;
       const now = performance.now();
-      if (now - hudFpsWindowStart >= 1000) {
-        hudFps = Math.round((hudFrameCount * 1000) / (now - hudFpsWindowStart));
-        hudFrameCount = 0;
-        hudFpsWindowStart = now;
+      if (now - sessionFpsWindowStart >= 1000) {
+        sessionFps = Math.round((sessionFrameCount * 1000) / (now - sessionFpsWindowStart));
+        sessionFrameCount = 0;
+        sessionFpsWindowStart = now;
       }
-      hudRafId = requestAnimationFrame(loop);
+      sessionRafId = requestAnimationFrame(loop);
     };
-    hudRafId = requestAnimationFrame(loop);
+    sessionRafId = requestAnimationFrame(loop);
   }
-  function stopFpsCounter() {
-    if (hudRafId) { cancelAnimationFrame(hudRafId); hudRafId = null; }
-    hudFps = 0;
+  function stopSessionFpsCounter() {
+    if (sessionRafId) { cancelAnimationFrame(sessionRafId); sessionRafId = null; }
+    sessionFps = 0;
   }
-  // Some browsers (Firefox) have PerformanceObserver but do NOT support the
-  // 'longtask' entry type, so the Lag row can't be measured there — we hide it
-  // (see updateHud) instead of showing a permanent, misleading 0 ms.
   function longTaskSupported() {
     return typeof PerformanceObserver !== 'undefined'
       && Array.isArray(PerformanceObserver.supportedEntryTypes)
       && PerformanceObserver.supportedEntryTypes.includes('longtask');
   }
-  function startLongTaskObserver() {
-    if (hudLongTaskObs || !longTaskSupported()) return;
+  function startSessionLongTaskObserver() {
+    if (sessionLongTaskObs || !longTaskSupported()) return;
     try {
-      hudLongTaskObs = new PerformanceObserver((list) => {
+      sessionLongTaskObs = new PerformanceObserver((list) => {
         const now = performance.now();
-        for (const entry of list.getEntries()) hudLongTasks.push({ t: now, dur: entry.duration });
+        for (const entry of list.getEntries()) sessionLongTasks.push({ t: now, dur: entry.duration });
       });
-      hudLongTaskObs.observe({ type: 'longtask', buffered: true });
-    } catch (_) { hudLongTaskObs = null; }
+      sessionLongTaskObs.observe({ type: 'longtask', buffered: true });
+    } catch (_) { sessionLongTaskObs = null; }
   }
-  function stopLongTaskObserver() {
-    if (hudLongTaskObs) { try { hudLongTaskObs.disconnect(); } catch (_) {} hudLongTaskObs = null; }
-    hudLongTasks = [];
+  function stopSessionLongTaskObserver() {
+    if (sessionLongTaskObs) {
+      try { sessionLongTaskObs.disconnect(); } catch (_) {}
+      sessionLongTaskObs = null;
+    }
+    sessionLongTasks = [];
   }
-  function currentLag() {
+  function currentSessionLag() {
     const cutoff = performance.now() - 5000;
-    hudLongTasks = hudLongTasks.filter((x) => x.t >= cutoff);
-    return Math.round(hudLongTasks.reduce((s, x) => s + x.dur, 0));
+    sessionLongTasks = sessionLongTasks.filter((x) => x.t >= cutoff);
+    return Math.round(sessionLongTasks.reduce((sum, item) => sum + item.dur, 0));
   }
-  function applyHud(on) {
-    if (!on) { removeHud(); return; }
-    ensureHud();
-    startHudTimer();
-    startFpsCounter();
-    startLongTaskObserver();
-    updateHud();
+  function applySessionStats(on) {
+    if (!on) { removeSessionStats(); return; }
+    ensureSessionStats();
+    startSessionStatsTimer();
   }
-  function removeHud() {
-    stopHudTimer();
-    stopFpsCounter();
-    stopLongTaskObserver();
-    if (hudEl) { hudEl.remove(); hudEl = null; }
+  function removeSessionStats() {
+    stopSessionStatsTimer();
+    stopSessionFpsCounter();
+    stopSessionLongTaskObserver();
+    if (sessionStatsDocHandler) {
+      document.removeEventListener('pointerdown', sessionStatsDocHandler, true);
+      document.removeEventListener('keydown', onSessionStatsKeyDown, true);
+      sessionStatsDocHandler = null;
+    }
+    if (sessionStatsEl) { sessionStatsEl.remove(); sessionStatsEl = null; }
   }
 
   // ── F3. Draft guard + freed-memory stat ───────────────────────────
@@ -1885,67 +1961,6 @@
         }, 3000);
       });
     } catch (_) {}
-  }
-
-  // ── Collapse Code ─────────────────────────────────────────────────
-  // We mark the <pre> (a React-owned node) with a class + attribute + a child
-  // toggle. React CAN wipe those on re-render, but — unlike the Hide-Thinking
-  // wrapper (whose className React rewrites in place on every scroll via
-  // data-is-intersecting) — a <pre> is only re-created when its whole turn
-  // unmounts/remounts. While unmounted there is no <pre> to collapse; on remount
-  // the fresh <pre> has no marker, so the next scan simply re-collapses it. This
-  // self-healing scan (re-add the toggle if the marker survived; re-collapse from
-  // scratch if it didn't) is therefore sufficient — no uuid-keyed <style> needed.
-  // A React re-render mid-read could briefly drop the user's manual "expand", but
-  // that is rare for completed turns; streaming turns are skipped outright.
-  function isStreaming() {
-    return !!document.querySelector('[data-testid="stop-button"], button[aria-label="Stop streaming"], .result-streaming');
-  }
-  function scanCollapseCode() {
-    const turns = getTurns();
-    const lastTurn = turns[turns.length - 1] || null;
-    const streaming = isStreaming();
-    document.querySelectorAll(TURN_SELECTOR + ' pre').forEach((pre) => {
-      if (pre.getAttribute('data-relai-collapsed')) {
-        // Re-add the toggle if a re-render wiped it but kept the marker.
-        if (!pre.querySelector(':scope > .relai-code-toggle')) addCollapseToggle(pre);
-        return;
-      }
-      if (streaming && lastTurn && lastTurn.contains(pre)) return;
-      if (pre.offsetHeight <= 420) return;
-      pre.setAttribute('data-relai-collapsed', '1');
-      pre.classList.add('relai-code-collapsed');
-      addCollapseToggle(pre);
-    });
-  }
-  function addCollapseToggle(pre) {
-    const n = pre.querySelectorAll('.cm-line').length || (pre.textContent || '').split('\n').length;
-    // The codeShowAll string is a plain label ("Show all"); append the line
-    // count ourselves so it stays correct regardless of translation wording.
-    const showLabel = () => t('codeShowAll') + ' (' + n + ')';
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'relai-code-toggle';
-    btn.textContent = showLabel();
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const collapsed = pre.classList.toggle('relai-code-collapsed');
-      btn.textContent = collapsed ? showLabel() : t('codeCollapse');
-    });
-    pre.appendChild(btn);
-  }
-  function revertCollapseCode() {
-    document.querySelectorAll('pre[data-relai-collapsed]').forEach((pre) => {
-      pre.classList.remove('relai-code-collapsed');
-      pre.removeAttribute('data-relai-collapsed');
-      const b = pre.querySelector(':scope > .relai-code-toggle');
-      if (b) b.remove();
-    });
-  }
-  function applyCollapseCode(on) {
-    toolActive.collapseCode = on;
-    if (!on) revertCollapseCode();
   }
 
   // ── Hide Thinking ─────────────────────────────────────────────────
@@ -2015,7 +2030,7 @@
     if (!on) revertHideThinking();
   }
 
-  // ── F6. Click-to-load Images ──────────────────────────────────────
+  // ── Manual Images ─────────────────────────────────────────────────
   // Defer only OFF-SCREEN, reasonably large images inside turns. We hide the
   // <img> (keeping its dimensions on a sibling button) rather than reparenting
   // React-owned nodes. Everything reverts cleanly when the feature is disabled.
@@ -2064,9 +2079,17 @@
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'relai-img-load';
+    syncInjectedTheme(btn);
     if (r.width) btn.style.width = Math.round(r.width) + 'px';
     if (r.height) btn.style.height = Math.round(r.height) + 'px';
-    btn.textContent = t('loadImage');
+    btn.setAttribute('aria-label', t('loadImage'));
+    const label = document.createElement('span');
+    label.className = 'relai-img-label';
+    label.textContent = t('imageDeferred');
+    const action = document.createElement('span');
+    action.className = 'relai-img-action';
+    action.textContent = t('loadImage');
+    btn.append(label, action);
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -2096,7 +2119,7 @@
     if (!on) revertClickToLoadImg();
   }
 
-  // ── F7. Prefetch / Instant Switch (Chrome-only) ───────────────────
+  // ── Quick Open (Chrome-only) ─────────────────────────────────────
   // Best-effort: injects a single <script type="speculationrules"> to prerender
   // the hovered chat. ChatGPT's CSP may refuse the injected rules and the server
   // can decline to prerender — when it works, switching chats is instant.

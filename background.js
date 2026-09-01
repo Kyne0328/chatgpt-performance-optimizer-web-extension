@@ -13,13 +13,12 @@ const DEFAULT_PREFS = {
   perfKeepSession: false,
   perfDeferScripts: false,
   // Workspace tools — read by content.js from GET_PREFS / PREFS_UPDATED.
-  navigatorEnabled: true,   // Turn Navigator widget, ON by default
-  hudEnabled: false,        // Performance HUD
-  cleanMemorySmart: false,  // smart Clean Memory (only reload when heavy)
-  collapseCode: false,      // collapse tall code blocks
+  navigatorEnabled: true,   // Conversation Navigator rail, ON by default
+  hudEnabled: false,        // Session Stats chip
+  cleanMemorySmart: false,  // automatic memory reset only when heavy
   hideThinking: false,      // hide reasoning ("Thought for Xs") rows
-  clickToLoadImg: false,    // load images on demand
-  prefetchNav: false,       // Chrome-only — Speculation Rules on hover
+  clickToLoadImg: false,    // Manual Images
+  prefetchNav: false,       // Quick Open via Chrome Speculation Rules
   // Chrome-only DNR network block. Owned by setTrackerBlocking() /
   // reconcileTrackerBlocking(): it needs the optional tracker host permissions,
   // so it is never written through SET_PREFS (see the message router).

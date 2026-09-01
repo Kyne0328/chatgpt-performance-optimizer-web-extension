@@ -1,38 +1,35 @@
-/* Rel.AI Companion — in-page interface */
+/* Rel.AI Companion — minimal in-page interface */
 
 @keyframes relai-spin{to{transform:rotate(360deg)}}
-.relai-spinner{display:none;width:18px;height:18px;flex:0 0 18px;border:2px solid rgba(127,127,127,.18);border-top-color:#8f83ff;border-radius:50%;animation:relai-spin .65s linear infinite}
+.relai-spinner{display:none;width:18px;height:18px;flex:0 0 18px;border:2px solid rgba(127,127,127,.18);border-top-color:#9b9b9b;border-radius:50%;animation:relai-spin .65s linear infinite}
 
-/* Turn Navigator */
-.relai-nav{position:fixed;right:14px;top:50%;z-index:99999;display:grid;grid-template-columns:1fr;gap:4px;transform:translateY(-50%);padding:6px;border:1px solid rgba(124,108,255,.22);border-radius:18px;background:rgba(13,15,19,.9);box-shadow:0 18px 45px rgba(0,0,0,.3);backdrop-filter:blur(16px);font-family:ui-sans-serif,system-ui,sans-serif;user-select:none}
-.relai-nav::before{display:block;width:18px;height:2px;margin:2px auto 3px;border-radius:999px;background:linear-gradient(90deg,#7c6cff,#4ea7ff);content:""}
-.relai-nav-btn{appearance:none;display:grid;place-items:center;width:32px;height:32px;margin:0;padding:0;border:0;border-radius:11px;background:transparent;color:#aeb5c0;cursor:pointer;font-size:14px;line-height:1;transition:background 120ms ease,color 120ms ease,transform 100ms ease}
-.relai-nav-btn:hover{background:rgba(124,108,255,.14);color:#c9c4ff}.relai-nav-btn:active{transform:scale(.94)}.relai-nav-btn:focus-visible{outline:2px solid #9f96ff;outline-offset:1px}
-.relai-nav-count{min-width:32px;padding:2px 0;color:#747d8b;font-size:9px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+/* Conversation Navigator — one scrubber instead of a floating button stack. */
+.relai-nav{position:fixed;right:3px;top:50%;z-index:99999;width:44px;height:220px;transform:translateY(-50%);cursor:pointer;touch-action:none;user-select:none;outline:none;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.relai-nav-track{position:absolute;top:14px;bottom:14px;left:50%;width:4px;overflow:visible;transform:translateX(-50%);border-radius:999px;background:rgba(255,255,255,.14)}
+.relai-nav-progress{position:absolute;top:0;left:0;width:100%;height:0;border-radius:999px;background:#9b9b9b;pointer-events:none}
+.relai-nav-thumb{position:absolute;top:0;left:50%;width:11px;height:11px;transform:translate(-50%,-50%);border:2px solid #171717;border-radius:50%;background:#ececec;box-shadow:0 1px 4px rgba(0,0,0,.35);pointer-events:none;transition:width 120ms ease,height 120ms ease}
+.relai-nav-count{position:absolute;right:38px;top:50%;min-width:54px;padding:5px 7px;transform:translateY(-50%) translateX(4px);border:1px solid rgba(255,255,255,.12);border-radius:7px;background:#212121;color:#d7d7d7;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;pointer-events:none;font-size:11px;font-weight:550;line-height:1;text-align:center;font-variant-numeric:tabular-nums;transition:opacity 120ms ease,transform 120ms ease}
+.relai-nav:hover .relai-nav-count,.relai-nav:focus-visible .relai-nav-count,.relai-nav.relai-nav-dragging .relai-nav-count{opacity:1;transform:translateY(-50%) translateX(0)}
+.relai-nav:hover .relai-nav-thumb,.relai-nav:focus-visible .relai-nav-thumb,.relai-nav.relai-nav-dragging .relai-nav-thumb{width:13px;height:13px}
+.relai-nav:focus-visible .relai-nav-track{outline:2px solid #6bb6f5;outline-offset:4px}
 
-/* Performance monitor */
-.relai-hud{position:fixed;bottom:18px;left:18px;z-index:99999;width:188px;overflow:hidden;border:1px solid rgba(124,108,255,.2);border-radius:16px;background:rgba(13,15,19,.92);box-shadow:0 18px 45px rgba(0,0,0,.32);backdrop-filter:blur(16px);color:#edf0f5;font-family:ui-sans-serif,system-ui,sans-serif;user-select:none}
-.relai-hud-head{display:flex;align-items:center;justify-content:space-between;min-height:34px;padding:6px 7px 6px 11px;border-bottom:1px solid rgba(255,255,255,.06);background:linear-gradient(90deg,rgba(124,108,255,.14),rgba(78,167,255,.05))}
-.relai-hud-title{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:750}.relai-hud-title::after{content:"Rel.AI monitor";color:#c9c4ff}
-.relai-hud-min{appearance:none;display:grid;place-items:center;width:23px;height:23px;padding:0;border:0;border-radius:8px;background:transparent;color:#87909d;cursor:pointer}.relai-hud-min:hover{background:rgba(255,255,255,.07);color:#fff}
-.relai-hud-body{display:grid;gap:5px;padding:9px 11px 10px}.relai-hud-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:10px}.relai-hud-k{color:#7f8996}.relai-hud-v{color:#dbe0e8;font-weight:650;font-variant-numeric:tabular-nums}.relai-hud.relai-hud-collapsed{width:auto}.relai-hud.relai-hud-collapsed .relai-hud-head{border-bottom:0}.relai-hud.relai-hud-collapsed .relai-hud-body{display:none}
+/* Session Stats — compact chip with an on-demand details popover. */
+.relai-session-stats{position:fixed;left:18px;bottom:18px;z-index:99999;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#ececec}
+.relai-session-chip{appearance:none;min-height:44px;padding:0 12px;border:1px solid rgba(255,255,255,.13);border-radius:9px;background:#212121;color:#e7e7e7;box-shadow:0 3px 12px rgba(0,0,0,.2);cursor:pointer;font:560 12px/1 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
+.relai-session-chip:hover{background:#2a2a2a}.relai-session-chip:focus-visible{outline:2px solid #6bb6f5;outline-offset:2px}
+.relai-session-popover{position:absolute;left:0;bottom:calc(100% + 8px);width:214px;padding:10px 11px;border:1px solid rgba(255,255,255,.13);border-radius:10px;background:#212121;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.relai-session-popover[hidden]{display:none}
+.relai-session-title{margin:0 0 8px;color:#f0f0f0;font-size:12px;font-weight:650}
+.relai-session-row{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:25px;border-top:1px solid rgba(255,255,255,.07);font-size:11px}
+.relai-session-row:first-of-type{border-top:0}.relai-session-key{color:#9b9b9b}.relai-session-value{color:#dedede;font-weight:560;font-variant-numeric:tabular-nums}
 
-/* Code folding */
-pre[data-relai-collapsed]{position:relative!important}
-pre.relai-code-collapsed{max-height:320px;overflow:hidden!important}
-.relai-code-toggle{appearance:none;position:absolute;right:10px;bottom:9px;z-index:3;min-height:30px;padding:0 10px;border:1px solid rgba(124,108,255,.28);border-radius:10px;background:rgba(17,20,25,.92);box-shadow:0 6px 18px rgba(0,0,0,.25);color:#c9c4ff;cursor:pointer;font:650 10px ui-sans-serif,system-ui,sans-serif;backdrop-filter:blur(10px)}
-.relai-code-toggle:hover{border-color:rgba(124,108,255,.55);background:rgba(124,108,255,.16)}
-pre[data-relai-collapsed]:not(.relai-code-collapsed) .relai-code-toggle{position:sticky;float:right;margin-top:8px}
+/* Manual Images — neutral inline replacement, no iconography or gradients. */
+.relai-img-load{appearance:none;display:flex;min-width:150px;min-height:92px;max-width:100%;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px;border:1px dashed rgba(255,255,255,.18);border-radius:8px;background:#212121;color:#d8d8d8;cursor:pointer;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-align:center;transition:background 120ms ease,border-color 120ms ease}
+.relai-img-load:hover{border-color:rgba(255,255,255,.3);background:#292929}.relai-img-load:focus-visible{outline:2px solid #6bb6f5;outline-offset:2px}
+.relai-img-label{color:#999;font-size:11px;font-weight:500}.relai-img-action{color:#ececec;font-size:12px;font-weight:600}
 
-/* Click-to-load images */
-.relai-img-load{appearance:none;display:inline-flex;min-width:150px;min-height:92px;max-width:100%;align-items:center;justify-content:center;padding:14px;border:1px solid rgba(124,108,255,.28);border-radius:16px;background:linear-gradient(145deg,rgba(124,108,255,.09),rgba(78,167,255,.04));color:#bdb7ff;cursor:pointer;font:650 11px ui-sans-serif,system-ui,sans-serif;transition:border-color 120ms ease,background 120ms ease,transform 100ms ease}
-.relai-img-load::before{margin-right:7px;content:"◫";font-size:14px}.relai-img-load:hover{border-color:rgba(124,108,255,.55);background:rgba(124,108,255,.14)}.relai-img-load:active{transform:translateY(1px)}
+.relai-nav.relai-light .relai-nav-track{background:rgba(0,0,0,.13)}.relai-nav.relai-light .relai-nav-progress{background:#777}.relai-nav.relai-light .relai-nav-thumb{border-color:#fff;background:#303030;box-shadow:0 1px 4px rgba(0,0,0,.18)}.relai-nav.relai-light .relai-nav-count{border-color:rgba(0,0,0,.1);background:#fff;color:#3c3c3c;box-shadow:0 4px 14px rgba(0,0,0,.1)}
+.relai-session-stats.relai-light{color:#202020}.relai-session-stats.relai-light .relai-session-chip,.relai-session-stats.relai-light .relai-session-popover{border-color:rgba(0,0,0,.11);background:#fff;color:#272727;box-shadow:0 4px 18px rgba(0,0,0,.1)}.relai-session-stats.relai-light .relai-session-chip:hover{background:#f3f3f3}.relai-session-stats.relai-light .relai-session-title{color:#202020}.relai-session-stats.relai-light .relai-session-row{border-top-color:rgba(0,0,0,.07)}.relai-session-stats.relai-light .relai-session-key{color:#777}.relai-session-stats.relai-light .relai-session-value{color:#303030}
+.relai-img-load.relai-light{border-color:rgba(0,0,0,.15);background:#f7f7f7;color:#303030}.relai-img-load.relai-light:hover{border-color:rgba(0,0,0,.25);background:#f0f0f0}.relai-img-load.relai-light .relai-img-label{color:#777}.relai-img-load.relai-light .relai-img-action{color:#222}
 
-@media(prefers-color-scheme:light){
-  .relai-nav,.relai-hud{background:rgba(248,249,251,.94);border-color:rgba(90,79,210,.18);box-shadow:0 16px 40px rgba(25,30,40,.14)}
-  .relai-nav-btn{color:#5c6572}.relai-nav-btn:hover{color:#6658db;background:rgba(124,108,255,.1)}.relai-nav-count{color:#7b8490}
-  .relai-hud{color:#1c222b}.relai-hud-head{border-bottom-color:rgba(0,0,0,.06)}.relai-hud-k{color:#747e8c}.relai-hud-v{color:#252c36}.relai-hud-min{color:#737d89}.relai-hud-min:hover{background:rgba(0,0,0,.05);color:#272e38}
-  .relai-code-toggle{background:rgba(250,250,252,.94);color:#6658db;box-shadow:0 6px 18px rgba(25,30,40,.13)}
-}
-
-@media(prefers-reduced-motion:reduce){.relai-spinner{animation-duration:1.4s}.relai-nav-btn,.relai-img-load{transition:none}}
+@media(prefers-reduced-motion:reduce){.relai-spinner{animation-duration:1.4s}.relai-nav-thumb,.relai-nav-count,.relai-img-load{transition:none}}
