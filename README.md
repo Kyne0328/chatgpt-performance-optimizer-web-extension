@@ -2,7 +2,7 @@
 
 Rel.AI Companion is a browser extension for ChatGPT that adds conversation exports, memory/session controls, navigation helpers, optional privacy controls, and lightweight performance tooling.
 
-Version **1.0.0** is a standalone project by **Kyne0328**. It does not require a subscription or license server.
+Version **1.0.0** is maintained by **Kyne0328**.
 
 ## Features
 
@@ -20,10 +20,10 @@ The v1 package targets **Chromium Manifest V3**.
 
 | Browser | Status | Notes |
 | --- | --- | --- |
-| Google Chrome | Supported | Primary target |
-| Microsoft Edge | Supported | Chromium extension APIs are largely compatible |
-| Brave | Supported | Chromium-based; use the same unpacked build |
-| Opera / Opera GX | Expected to work | Chromium-based; test before release distribution |
+| Google Chrome | Supported | Primary target; v1 runtime tested in Chromium |
+| Microsoft Edge | Compatible target | Chromium extension APIs are largely compatible; smoke-test before release |
+| Brave | Expected to work | Chromium-based; not separately tested in v1 |
+| Opera / Opera GX | Expected to work | Chromium-based; not separately tested in v1 |
 | Firefox | Not packaged in v1 | Needs a Firefox-specific manifest/background compatibility pass |
 | Safari | Not packaged in v1 | Requires Safari Web Extension conversion and Xcode packaging |
 
@@ -31,7 +31,7 @@ Experimental features such as prerender-based Instant Chat Switch can remain una
 
 ## Install from GitHub
 
-Chrome-family browsers can run the project without the Chrome Web Store:
+For development and manual installation, Chrome-family browsers can load the project without the Chrome Web Store:
 
 1. Download or clone this repository.
 2. Open the browser's extensions page.

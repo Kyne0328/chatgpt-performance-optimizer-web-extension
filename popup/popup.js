@@ -1,4 +1,4 @@
-/* Rel.AI Companion — popup control center */
+/* Rel.AI Companion — compact popup */
 (() => {
   'use strict';
 
@@ -35,8 +35,6 @@
   ];
 
   const I18N = window.RELAI_I18N;
-  const panels = Array.from(document.querySelectorAll('[data-screen-panel]'));
-  const tabs = Array.from(document.querySelectorAll('[data-screen]'));
   const prefControls = Array.from(document.querySelectorAll('[data-pref]'));
   const exportButtons = Array.from(document.querySelectorAll('[data-export-format]'));
   const selectedExportButtons = Array.from(document.querySelectorAll('[data-selected-export]'));
@@ -45,6 +43,7 @@
   const connectionText = $('connectionText');
   const homeStatusText = $('homeStatusText');
   const openChatBtn = $('openChatBtn');
+  const summarySection = $('summarySection');
   const statsRow = $('statsRow');
   const noStats = $('noStats');
   const statTotal = $('statTotal');
@@ -107,26 +106,6 @@
     toast.setAttribute('role', tone === 'error' ? 'alert' : 'status');
     toastTimer = setTimeout(() => { toast.hidden = true; }, duration);
   }
-
-  function switchScreen(name) {
-    panels.forEach(panel => {
-      const active = panel.dataset.screenPanel === name;
-      panel.hidden = !active;
-      panel.classList.toggle('is-active', active);
-    });
-    tabs.forEach(tab => {
-      const active = tab.dataset.screen === name;
-      tab.classList.toggle('is-active', active);
-      if (active) tab.setAttribute('aria-current', 'page');
-      else tab.removeAttribute('aria-current');
-    });
-    document.querySelector('.viewport')?.scrollTo({ top: 0, behavior: 'auto' });
-  }
-
-  tabs.forEach(tab => tab.addEventListener('click', () => switchScreen(tab.dataset.screen)));
-  document.querySelectorAll('[data-go-screen]').forEach(button => {
-    button.addEventListener('click', () => switchScreen(button.dataset.goScreen));
-  });
 
   function controlsFor(key) {
     return prefControls.filter(control => control.dataset.pref === key);
@@ -243,15 +222,15 @@
 
   function setConnectedUI(connected) {
     connectionBadge.dataset.state = connected ? 'connected' : 'idle';
-    connectionText.textContent = connected ? 'Connected' : 'No ChatGPT tab';
+    connectionText.textContent = connected ? 'Connected to ChatGPT' : 'ChatGPT not open';
     homeStatusText.textContent = connected
-      ? 'Rel.AI is connected to the active ChatGPT tab. Live tools and exports are ready.'
-      : 'Open ChatGPT to see live conversation data and use Rel.AI tools.';
-    openChatBtn.textContent = connected ? 'Go to Export' : 'Open ChatGPT';
+      ? 'Conversation tools are ready for the active ChatGPT tab.'
+      : 'Open ChatGPT to use conversation tools.';
+    openChatBtn.textContent = connected ? 'Export' : 'Open ChatGPT';
     openChatBtn.dataset.connected = String(connected);
     exportConnectionText.textContent = connected
-      ? 'Export the active conversation without leaving ChatGPT.'
-      : 'Open a ChatGPT conversation to enable export.';
+      ? 'Export or copy the active conversation.'
+      : 'Open a ChatGPT conversation to export it.';
     exportButtons.forEach(button => { button.disabled = !connected; });
     copyMdBtn.disabled = !connected;
     copyTxtBtn.disabled = !connected;
@@ -259,18 +238,23 @@
   }
 
   openChatBtn.addEventListener('click', () => {
-    if (cachedChatTab) return switchScreen('export');
+    if (cachedChatTab) {
+      document.getElementById('exportSection')?.scrollIntoView({ block: 'start' });
+      return;
+    }
     try { globalThis.chrome.tabs.create({ url: 'https://chatgpt.com/' }); }
     catch { window.open('https://chatgpt.com/', '_blank', 'noopener'); }
   });
 
   function showEmptyStats() {
+    summarySection.hidden = true;
     statsRow.hidden = true;
-    noStats.hidden = false;
+    noStats.hidden = true;
   }
 
   function renderStats(stats) {
     if (!stats || typeof stats.total !== 'number') return showEmptyStats();
+    summarySection.hidden = false;
     statsRow.hidden = false;
     noStats.hidden = true;
     statTotal.textContent = stats.total;
@@ -446,6 +430,7 @@
     if (!resetArmed) {
       resetArmed = true;
       resetSettingsHint.textContent = 'Click again to confirm';
+      showToast('Click Reset again to confirm', 'warning', 4000);
       clearTimeout(resetTimer);
       resetTimer = setTimeout(() => {
         resetArmed = false;

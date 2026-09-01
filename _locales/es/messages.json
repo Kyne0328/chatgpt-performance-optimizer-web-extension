@@ -13,7 +13,5 @@
   "renderWindow": {"description":"Etiqueta de renderizado","message":"Ventana de renderizado: $COUNT$ mensajes","placeholders":{"count":{"content":"$1","example":"30"}}},
   "selSelected": {"description":"Conteo seleccionado","message":"$COUNT$ seleccionados","placeholders":{"count":{"content":"$1","example":"3"}}},
   "selectionMode": {"description":"Etiqueta del modo selección","message":"Modo Selección"},
-  "selectionModeDesc": {"description":"Descripción del modo selección","message":"Elige mensajes específicos para exportar"},
-  "speedBooster": {"description":"Etiqueta principal","message":"Limpiar memoria"},
-  "speedBoosterDesc": {"description":"Descripción de limpieza","message":"Recarga al cambiar de chat para liberar memoria"}
+  "selectionModeDesc": {"description":"Descripción del modo selección","message":"Elige mensajes específicos para exportar"}
 }

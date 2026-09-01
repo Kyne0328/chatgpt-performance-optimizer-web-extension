@@ -13,7 +13,5 @@
   "renderWindow": {"description":"Slider label","message":"Render window: $COUNT$ messages","placeholders":{"count":{"content":"$1","example":"30"}}},
   "selSelected": {"description":"Selected messages count","message":"$COUNT$ selected","placeholders":{"count":{"content":"$1","example":"3"}}},
   "selectionMode": {"description":"Selection mode toggle label","message":"Selection Mode"},
-  "selectionModeDesc": {"description":"Selection mode description","message":"Choose specific messages to export"},
-  "speedBooster": {"description":"Main toggle label","message":"Clean Memory"},
-  "speedBoosterDesc": {"description":"Clean Memory description","message":"Reload fresh when switching chats to free memory"}
+  "selectionModeDesc": {"description":"Selection mode description","message":"Choose specific messages to export"}
 }

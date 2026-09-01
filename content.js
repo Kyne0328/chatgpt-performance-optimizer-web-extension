@@ -1,10 +1,6 @@
 /**
- * Rel.AI Companion — Content Script
- * Progressive message loading for long ChatGPT conversations.
- *
- * Strategy: CSS hides ALL turns at document_start (zero layout cost).
- * This script shows only the last N turns and loads more on scroll-up.
- * Uses a dynamic <style> tag for visibility — survives React re-renders.
+ * Rel.AI Companion — ChatGPT integration
+ * Applies user-selected workspace, performance, export, and navigation tools.
  */
 (() => {
   'use strict';
@@ -139,9 +135,9 @@
 
   function interceptChatLinks() {
     document.addEventListener('click', (e) => {
-      // Clean Memory mode (the repurposed toggle) only. When on, switching
-      // chats does a fresh reload so ChatGPT drops the previous conversation's
-      // accumulated memory. When off, leave ChatGPT's native SPA nav alone.
+      // Clean Memory performs a fresh reload when switching conversations so
+      // ChatGPT can release state accumulated by the previous conversation.
+      // When off, leave ChatGPT's native SPA navigation alone.
       if (!cleanMemoryActive) return;
       const link = e.target.closest('nav a[href^="/c/"], nav a[href="/"]');
       if (!link) return;
@@ -1489,9 +1485,9 @@
   const TOOL_DEFAULTS = {
     navigatorEnabled: true,   // Turn Navigator, default ON
     hudEnabled: false,        // Performance HUD
-    cleanMemorySmart: false,  // free — smart Clean Memory (read live in interceptChatLinks)
-    collapseCode: false,      // free — collapse tall code blocks
-    hideThinking: false,      // free — hide "Thought for Xs" rows
+    cleanMemorySmart: false,  // smart Clean Memory (read live in interceptChatLinks)
+    collapseCode: false,      // collapse tall code blocks
+    hideThinking: false,      // hide reasoning-only rows
     clickToLoadImg: false,    // load off-screen images on demand
     prefetchNav: false        // Chrome-only — Speculation Rules on hover
     // blockTrackersNet is handled by background (DNR) — no content-side effect.
@@ -1596,7 +1592,7 @@
     if (toolScanNeeded()) runToolScan();
   }
 
-  // ── F1. Turn Navigator (free) ─────────────────────────────────────
+  // ── Turn Navigator ────────────────────────────────────────────────
   let navWidget = null;
   let navScrollHandler = null;
   let navScrollTarget = null;
@@ -1917,7 +1913,7 @@
     } catch (_) {}
   }
 
-  // ── F4. Collapse Code (free) ──────────────────────────────────────
+  // ── Collapse Code ─────────────────────────────────────────────────
   // We mark the <pre> (a React-owned node) with a class + attribute + a child
   // toggle. React CAN wipe those on re-render, but — unlike the Hide-Thinking
   // wrapper (whose className React rewrites in place on every scroll via
@@ -1978,7 +1974,7 @@
     if (!on) revertCollapseCode();
   }
 
-  // ── F5. Hide Thinking (free) ──────────────────────────────────────
+  // ── Hide Thinking ─────────────────────────────────────────────────
   // A reasoning-only row is a MOUNTED assistant turn that has a <button> (the
   // localized "Thought for Xs" toggle) but renders NO answer content. We detect
   // this structurally (absence of .markdown/.prose/pre/table/img) so it stays
