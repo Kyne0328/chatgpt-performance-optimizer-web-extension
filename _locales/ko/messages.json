@@ -1,10 +1,10 @@
 {
-   "extDescription": {
-      "description": "확장 프로그램 설명",
-      "message": "대화 턴 간 이동, 성능 모니터링, 스마트 메모리 정리, ChatGPT를 TXT/MD/PDF/Word로 내보내기."
-   },
-   "extName": {
-      "description": "확장 프로그램 이름",
-      "message": "Rel.AI Companion"
-   }
+  "extDescription": {
+    "description": "확장 프로그램 설명",
+    "message": "긴 대화를 탐색하고 메모리를 관리하며 성능을 조정하고 ChatGPT의 선택적 개인정보 보호 기능을 제어합니다."
+  },
+  "extName": {
+    "description": "확장 프로그램 이름",
+    "message": "Rel.AI Companion"
+  }
 }

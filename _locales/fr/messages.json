@@ -1,10 +1,10 @@
 {
-   "extDescription": {
-      "description": "Description de l'extension",
-      "message": "Passez d'un tour à l'autre, suivez les performances, nettoyez la mémoire et exportez en TXT/MD/PDF/Word."
-   },
-   "extName": {
-      "description": "Nom de l'extension",
-      "message": "Rel.AI Companion"
-   }
+  "extDescription": {
+    "description": "Description de l'extension",
+    "message": "Naviguez dans les longues conversations, gérez la mémoire, ajustez les performances et contrôlez les options de confidentialité dans ChatGPT."
+  },
+  "extName": {
+    "description": "Nom de l'extension",
+    "message": "Rel.AI Companion"
+  }
 }

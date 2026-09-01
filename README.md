@@ -1,13 +1,11 @@
 # Rel.AI Companion
 
-Rel.AI Companion is a browser extension for ChatGPT that adds conversation exports, memory/session controls, navigation helpers, optional privacy controls, and lightweight performance tooling.
+Rel.AI Companion is a browser extension for ChatGPT that adds memory/session controls, navigation helpers, optional privacy controls, and lightweight performance tooling.
 
 Version **1.0.0** is maintained by **Kyne0328**.
 
 ## Features
 
-- Conversation export to TXT, Markdown, PDF/print, Word, and JSON
-- Selective turn export and Markdown/plain-text copy
 - Clean Memory mode for long ChatGPT sessions
 - Turn Navigator and optional performance monitor
 - Image, animation, DOM, media, and resource-loading controls
@@ -50,7 +48,6 @@ Useful validation commands:
 ```sh
 node --check background.js
 node --check content.js
-node --check main-world.js
 node --check popup/popup.js
 node --check shared/i18n-data.js
 ```

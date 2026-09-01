@@ -12,8 +12,8 @@
   <div class="popup-shell">
     <header class="header">
       <div class="brand">
-        <img src="../icons/icon128.png" alt="" role="presentation" width="30" height="30">
-        <div>
+        <img src="../icons/icon128.png" alt="" role="presentation" width="32" height="32">
+        <div class="brand-copy">
           <h1>Rel.AI Companion</h1>
           <div class="connection" id="connectionBadge" data-state="loading" role="status" aria-live="polite">
             <span class="connection-dot" aria-hidden="true"></span>
@@ -28,162 +28,131 @@
 
     <main id="mainContent">
       <section class="summary" id="summarySection" aria-label="Conversation status" hidden>
-        <div class="stats" id="statsRow">
-          <span><strong id="statTotal">--</strong> messages</span>
-          <span><strong id="statRendered">--</strong> rendered</span>
-          <span>Clean Memory <strong id="statMemory">--</strong></span>
-        </div>
-        <p class="muted-note" id="noStats" hidden>Conversation stats appear when ChatGPT is open.</p>
-        <div class="last-clean" id="lastCleanStat" hidden>
-          Last cleanup: <strong id="lastCleanValue">No cleanup recorded</strong>
-        </div>
+        <div class="summary-item"><span>Messages</span><strong id="statTotal">--</strong></div>
+        <div class="summary-item"><span>Rendered</span><strong id="statRendered">--</strong></div>
+        <div class="summary-item"><span>Clean Memory</span><strong id="statMemory">--</strong></div>
+        <span id="statsRow" hidden></span>
+        <span id="noStats" hidden></span>
+        <div class="last-clean" id="lastCleanStat" hidden>Last cleanup <strong id="lastCleanValue">—</strong></div>
       </section>
 
-      <section class="section" id="exportSection" aria-labelledby="exportTitle">
-        <div class="section-heading">
-          <h2 id="exportTitle">Export conversation</h2>
-          <p id="exportConnectionText">Open a ChatGPT conversation to export it.</p>
+      <section class="panel" aria-labelledby="essentialsTitle">
+        <div class="panel-heading">
+          <h2 id="essentialsTitle">Essentials</h2>
+          <p>Everyday controls for a cleaner ChatGPT session.</p>
         </div>
-
-        <div class="export-grid" aria-label="Export formats">
-          <button type="button" data-export-format="txt"><strong>TXT</strong><span>Plain text</span></button>
-          <button type="button" data-export-format="md"><strong>MD</strong><span>Markdown</span></button>
-          <button type="button" data-export-format="pdf"><strong>PDF</strong><span>Print</span></button>
-          <button type="button" data-export-format="word"><strong>DOC</strong><span>Word</span></button>
-          <button type="button" data-export-format="json"><strong>JSON</strong><span>Backup</span></button>
-        </div>
-
-        <div class="copy-actions">
-          <button type="button" id="copyMdBtn">Copy Markdown</button>
-          <button type="button" id="copyTxtBtn">Copy text</button>
-        </div>
-
-        <button class="setting-row" id="selModeToggle" type="button" role="switch" aria-checked="false">
-          <span class="setting-copy"><strong>Select messages</strong><small>Choose individual turns before exporting.</small></span>
-          <span class="switch-state" data-state-label>Off</span>
-        </button>
-
-        <div class="selected-export" id="exportSelRow" hidden>
-          <strong id="selCount">0 selected</strong>
-          <div>
-            <button type="button" data-selected-export="txt" disabled>TXT</button>
-            <button type="button" data-selected-export="md" disabled>MD</button>
-            <button type="button" data-selected-export="pdf" disabled>PDF</button>
-            <button type="button" data-selected-export="word" disabled>DOC</button>
-            <button type="button" data-selected-export="json" disabled>JSON</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" aria-labelledby="chatToolsTitle">
-        <div class="section-heading compact-heading">
-          <h2 id="chatToolsTitle">Chat tools</h2>
-          <p>Useful defaults for everyday conversations.</p>
-        </div>
-
         <div class="row-list">
           <button class="setting-row" type="button" data-pref="cleanMemoryEnabled">
-            <span class="setting-copy"><strong>Clean Memory</strong><small>Reload when switching chats to clear accumulated tab memory.</small></span>
-            <span class="switch-state" data-state-label>On</span>
+            <span class="setting-copy"><strong>Clean Memory</strong><small>Start fresh when switching conversations to release accumulated tab memory.</small></span>
+            <span class="switch" data-state-label>On</span>
           </button>
           <button class="setting-row" type="button" data-pref="cleanMemorySmart">
-            <span class="setting-copy"><strong>Smart clean</strong><small>Reload only when the current session looks memory-heavy.</small></span>
-            <span class="switch-state" data-state-label>Off</span>
+            <span class="setting-copy"><strong>Smart Clean</strong><small>Only reload when the current session appears memory-heavy.</small></span>
+            <span class="switch" data-state-label>Off</span>
           </button>
           <button class="setting-row" type="button" data-pref="navigatorEnabled">
-            <span class="setting-copy"><strong>Turn Navigator</strong><small>Add a small jump control to longer conversations.</small></span>
-            <span class="switch-state" data-state-label>On</span>
+            <span class="setting-copy"><strong>Turn Navigator</strong><small>Add a compact jump control for long conversations.</small></span>
+            <span class="switch" data-state-label>On</span>
           </button>
           <button class="setting-row" type="button" data-pref="hideNotifications">
-            <span class="setting-copy"><strong>Quiet mode</strong><small>Hide ChatGPT banners and announcement popups.</small></span>
-            <span class="switch-state" data-state-label>Off</span>
+            <span class="setting-copy"><strong>Quiet Mode</strong><small>Hide ChatGPT banners, notices, and announcement popups.</small></span>
+            <span class="switch" data-state-label>Off</span>
           </button>
           <button class="setting-row" type="button" data-pref="collapseCode">
-            <span class="setting-copy"><strong>Collapse long code</strong><small>Fold tall code blocks until you choose to expand them.</small></span>
-            <span class="switch-state" data-state-label>Off</span>
-          </button>
-          <button class="setting-row" type="button" data-pref="hideThinking">
-            <span class="setting-copy"><strong>Hide reasoning rows</strong><small>Hide standalone reasoning rows when they can be detected.</small></span>
-            <span class="switch-state" data-state-label>Off</span>
+            <span class="setting-copy"><strong>Collapse Long Code</strong><small>Fold tall code blocks until you choose to expand them.</small></span>
+            <span class="switch" data-state-label>Off</span>
           </button>
         </div>
       </section>
 
-      <details class="section details-section">
-        <summary>
-          <span><strong>Performance</strong><small>Loading and rendering options</small></span>
-          <span class="chevron" aria-hidden="true">›</span>
-        </summary>
-        <div class="details-body row-list">
+      <section class="panel" aria-labelledby="performanceTitle">
+        <div class="panel-heading">
+          <h2 id="performanceTitle">Performance</h2>
+          <p>Reduce unnecessary rendering and loading work.</p>
+        </div>
+        <div class="row-list">
           <button class="setting-row" type="button" data-pref="perfResourceHints">
-            <span class="setting-copy"><strong>Preconnect resources</strong><small>Prepare connections to ChatGPT asset servers.</small></span>
-            <span class="switch-state" data-state-label>On</span>
+            <span class="setting-copy"><strong>Preconnect Resources</strong><small>Prepare connections to ChatGPT asset servers earlier.</small></span>
+            <span class="switch" data-state-label>On</span>
           </button>
           <button class="setting-row" type="button" data-pref="perfReduceAnim">
-            <span class="setting-copy"><strong>Reduce animations</strong><small>Shorten transitions and decorative motion.</small></span>
-            <span class="switch-state" data-state-label>On</span>
+            <span class="setting-copy"><strong>Reduce Animations</strong><small>Shorten decorative transitions and motion.</small></span>
+            <span class="switch" data-state-label>On</span>
           </button>
           <button class="setting-row" type="button" data-pref="perfOptimizeDom">
-            <span class="setting-copy"><strong>Contain chat layout</strong><small>Limit layout recalculation inside conversation turns.</small></span>
-            <span class="switch-state" data-state-label>On</span>
+            <span class="setting-copy"><strong>Contain Chat Layout</strong><small>Limit layout recalculation inside conversation turns.</small></span>
+            <span class="switch" data-state-label>On</span>
           </button>
           <button class="setting-row" type="button" data-pref="perfLazyImg">
-            <span class="setting-copy"><strong>Lazy-load images</strong><small>Let off-screen images wait until they are needed.</small></span>
-            <span class="switch-state" data-state-label>On</span>
+            <span class="setting-copy"><strong>Lazy-load Images</strong><small>Delay off-screen image loading until it is useful.</small></span>
+            <span class="switch" data-state-label>On</span>
           </button>
           <button class="setting-row" type="button" data-pref="perfDeferScripts">
-            <span class="setting-copy"><strong>Defer off-screen media</strong><small>Lower the priority of media and embedded frames.</small></span>
-            <span class="switch-state" data-state-label>Off</span>
+            <span class="setting-copy"><strong>Defer Off-screen Media</strong><small>Lower priority for embedded media outside the viewport.</small></span>
+            <span class="switch" data-state-label>Off</span>
           </button>
           <button class="setting-row" type="button" data-pref="perfFontSwap">
-            <span class="setting-copy"><strong>Font optimization</strong><small>Avoid synthetic font rendering.</small></span>
-            <span class="switch-state" data-state-label>On</span>
+            <span class="setting-copy"><strong>Font Optimization</strong><small>Avoid synthetic font rendering where possible.</small></span>
+            <span class="switch" data-state-label>On</span>
           </button>
         </div>
-      </details>
+      </section>
 
-      <details class="section details-section">
-        <summary>
-          <span><strong>More tools</strong><small>Optional and experimental controls</small></span>
-          <span class="chevron" aria-hidden="true">›</span>
-        </summary>
-        <div class="details-body row-list">
-          <button class="setting-row" type="button" data-pref="hudEnabled">
-            <span class="setting-copy"><strong>Performance monitor</strong><small>Show memory, DOM and responsiveness data in ChatGPT.</small></span>
-            <span class="switch-state" data-state-label>Off</span>
-          </button>
-          <button class="setting-row" type="button" data-pref="clickToLoadImg">
-            <span class="setting-copy"><strong>Load images on click</strong><small>Delay off-screen images until you request them.</small></span>
-            <span class="switch-state" data-state-label>Off</span>
-          </button>
-          <button class="setting-row" type="button" data-pref="prefetchNav">
-            <span class="setting-copy"><strong>Preload chats on hover</strong><small>Ask Chromium to prepare a conversation before you open it.</small></span>
-            <span class="switch-state" data-state-label>Off</span>
-          </button>
+      <section class="panel" aria-labelledby="privacyTitle">
+        <div class="panel-heading">
+          <h2 id="privacyTitle">Privacy &amp; Distractions</h2>
+          <p>Optional controls for trackers and background activity.</p>
+        </div>
+        <div class="row-list">
           <button class="setting-row" type="button" data-pref="perfBlockTrackers">
-            <span class="setting-copy"><strong>Remove tracker elements</strong><small>Strip known analytics elements after they appear.</small></span>
-            <span class="switch-state" data-state-label>Off</span>
+            <span class="setting-copy"><strong>Remove Tracker Elements</strong><small>Remove known analytics elements after they appear on the page.</small></span>
+            <span class="switch" data-state-label>Off</span>
           </button>
           <button class="setting-row" id="trackerToggle" type="button" data-special="tracker">
-            <span class="setting-copy"><strong>Block tracker requests</strong><small>Use browser network rules for selected analytics domains.</small></span>
-            <span class="switch-state" data-state-label>Off</span>
+            <span class="setting-copy"><strong>Block Tracker Requests</strong><small>Use browser network rules for selected analytics domains.</small></span>
+            <span class="switch" data-state-label>Off</span>
           </button>
           <p class="inline-message" id="trackerMsg" role="status" aria-live="polite" hidden></p>
           <button class="setting-row" type="button" data-pref="perfKeepSession">
-            <span class="setting-copy"><strong>Keep session active</strong><small>Periodically refresh ChatGPT session state.</small></span>
-            <span class="switch-state" data-state-label>Off</span>
+            <span class="setting-copy"><strong>Keep Session Active</strong><small>Periodically refresh ChatGPT session state in the background.</small></span>
+            <span class="switch" data-state-label>Off</span>
+          </button>
+        </div>
+      </section>
+
+      <details class="panel collapsible">
+        <summary>
+          <span><strong>Advanced</strong><small>Optional tools that change how ChatGPT behaves.</small></span>
+          <span class="chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="details-body row-list">
+          <button class="setting-row" type="button" data-pref="hudEnabled">
+            <span class="setting-copy"><strong>Performance Monitor</strong><small>Show memory, DOM, and responsiveness data in ChatGPT.</small></span>
+            <span class="switch" data-state-label>Off</span>
+          </button>
+          <button class="setting-row" type="button" data-pref="hideThinking">
+            <span class="setting-copy"><strong>Hide Reasoning Rows</strong><small>Hide standalone reasoning rows when they can be detected.</small></span>
+            <span class="switch" data-state-label>Off</span>
+          </button>
+          <button class="setting-row" type="button" data-pref="clickToLoadImg">
+            <span class="setting-copy"><strong>Load Images on Click</strong><small>Delay off-screen images until you request them.</small></span>
+            <span class="switch" data-state-label>Off</span>
+          </button>
+          <button class="setting-row" type="button" data-pref="prefetchNav">
+            <span class="setting-copy"><strong>Preload Chats on Hover</strong><small>Ask Chromium to prepare a conversation before you open it.</small></span>
+            <span class="switch" data-state-label>Off</span>
           </button>
         </div>
       </details>
 
-      <details class="section details-section">
+      <details class="panel collapsible settings-panel">
         <summary>
-          <span><strong>Settings</strong><small>Language, backup and diagnostics</small></span>
-          <span class="chevron" aria-hidden="true">›</span>
+          <span><strong>Settings</strong><small>Language, local data, and diagnostics.</small></span>
+          <span class="chevron" aria-hidden="true">⌄</span>
         </summary>
-        <div class="details-body settings-body">
+        <div class="details-body">
           <label class="select-row" for="langSelect">
-            <span><strong>Language</strong><small>Used in exports and injected tools.</small></span>
+            <span><strong>Language</strong><small>Used by the extension and injected tools.</small></span>
             <select id="langSelect">
               <option value="auto">Auto</option>
               <option value="en">English</option>
@@ -199,18 +168,15 @@
             </select>
           </label>
 
-          <div class="small-actions">
-            <button type="button" id="exportSettingsBtn">Backup settings</button>
+          <div class="settings-actions">
+            <button type="button" id="backupSettingsBtn">Back up settings</button>
             <button type="button" id="importSettingsBtn">Restore settings</button>
-            <button type="button" id="resetSettingsBtn" class="danger-action">Reset <span id="resetSettingsHint" class="sr-only">Restore v1 defaults</span></button>
+            <button type="button" id="resetSettingsBtn" class="danger-action">Reset <span id="resetSettingsHint" class="sr-only">Restore version 1 defaults</span></button>
           </div>
           <input id="settingsFileInput" type="file" accept="application/json,.json" hidden>
 
           <div class="diagnostics">
-            <div class="diagnostics-heading">
-              <strong>Diagnostics</strong>
-              <button type="button" id="refreshDiagnosticsBtn">Refresh</button>
-            </div>
+            <div class="diagnostics-heading"><strong>Diagnostics</strong><button type="button" id="refreshDiagnosticsBtn">Refresh</button></div>
             <div class="diagnostic-list">
               <span>Extension <strong id="diagRuntime" data-tone="muted">Checking</strong></span>
               <span>ChatGPT tab <strong id="diagChatTab" data-tone="muted">Checking</strong></span>
@@ -225,17 +191,14 @@
     </main>
 
     <footer class="footer">
-      <span id="versionText">v1.0.0</span>
-      <span aria-hidden="true">·</span>
-      <button type="button" id="githubBtn">GitHub</button>
-      <span aria-hidden="true">·</span>
+      <span id="versionText">v1.0.0</span><span aria-hidden="true">·</span>
+      <button type="button" id="githubBtn">GitHub</button><span aria-hidden="true">·</span>
       <button type="button" id="websiteBtn">Kyne0328</button>
     </footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" hidden>
-    <span class="toast-dot" aria-hidden="true"></span>
-    <span id="toastText"></span>
+    <span class="toast-dot" aria-hidden="true"></span><span id="toastText"></span>
   </div>
 
   <script src="../shared/i18n-data.js"></script>

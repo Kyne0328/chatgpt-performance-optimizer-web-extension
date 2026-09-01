@@ -459,19 +459,6 @@ async function handleMessage(msg) {
       return { success: true };
     }
 
-    case 'DOWNLOAD_FILE': {
-      try {
-        await chrome.downloads.download({
-          url: msg.url,
-          filename: msg.filename,
-          saveAs: false
-        });
-        return { success: true };
-      } catch (err) {
-        return { success: false, error: err.message };
-      }
-    }
-
     default:
       return { error: 'unknown_action' };
   }

@@ -43,11 +43,5 @@
     "*://*.google-analytics.com/*",
     "*://*.doubleclick.net/*"
   ],
-  "permissions": ["storage", "activeTab", "downloads", "declarativeNetRequestWithHostAccess"],
-  "web_accessible_resources": [
-    {
-      "matches": ["<all_urls>"],
-      "resources": ["main-world.js"]
-    }
-  ]
+  "permissions": ["storage", "activeTab", "declarativeNetRequestWithHostAccess"]
 }

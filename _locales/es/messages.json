@@ -1,17 +1,40 @@
 {
-  "exportConversation": {"description":"Título de exportación","message":"Exportar Conversación"},
-  "exportError": {"description":"Mensaje de error de exportación","message":"Error al exportar. Intenta de nuevo."},
-  "exporting": {"description":"Estado de exportación","message":"..."},
-  "extDescription": {"description":"Descripción de la extensión","message":"Navega conversaciones, optimiza el rendimiento de ChatGPT, gestiona controles de privacidad y exporta chats a TXT/MD/PDF/Word/JSON."},
-  "extName": {"description":"Nombre de la extensión","message":"Rel.AI Companion"},
-  "hideNotifications": {"description":"Etiqueta de notificaciones","message":"Ocultar Banners y Popups"},
-  "hideNotificationsDesc": {"description":"Descripción de notificaciones","message":"Bloquear alertas y anuncios de ChatGPT"},
-  "memorySaved": {"description":"Etiqueta de memoria","message":"Memoria Optimizada"},
-  "messagesLabel": {"description":"Etiqueta de mensajes","message":"Mensajes"},
-  "noMessages": {"description":"Mensaje de conversación vacía","message":"No se encontraron mensajes para exportar."},
-  "openChatGPT": {"description":"Mostrado fuera de ChatGPT","message":"Abre ChatGPT para ver estadísticas"},
-  "renderWindow": {"description":"Etiqueta de renderizado","message":"Ventana de renderizado: $COUNT$ mensajes","placeholders":{"count":{"content":"$1","example":"30"}}},
-  "selSelected": {"description":"Conteo seleccionado","message":"$COUNT$ seleccionados","placeholders":{"count":{"content":"$1","example":"3"}}},
-  "selectionMode": {"description":"Etiqueta del modo selección","message":"Modo Selección"},
-  "selectionModeDesc": {"description":"Descripción del modo selección","message":"Elige mensajes específicos para exportar"}
+  "extDescription": {
+    "description": "Descripción de la extensión",
+    "message": "Navega conversaciones largas, gestiona la memoria, ajusta el rendimiento y controla funciones opcionales de privacidad en ChatGPT."
+  },
+  "extName": {
+    "description": "Nombre de la extensión",
+    "message": "Rel.AI Companion"
+  },
+  "hideNotifications": {
+    "description": "Etiqueta de notificaciones",
+    "message": "Ocultar Banners y Popups"
+  },
+  "hideNotificationsDesc": {
+    "description": "Descripción de notificaciones",
+    "message": "Bloquear alertas y anuncios de ChatGPT"
+  },
+  "memorySaved": {
+    "description": "Etiqueta de memoria",
+    "message": "Memoria Optimizada"
+  },
+  "messagesLabel": {
+    "description": "Etiqueta de mensajes",
+    "message": "Mensajes"
+  },
+  "openChatGPT": {
+    "description": "Mostrado fuera de ChatGPT",
+    "message": "Abre ChatGPT para ver estadísticas"
+  },
+  "renderWindow": {
+    "description": "Etiqueta de renderizado",
+    "message": "Ventana de renderizado: $COUNT$ mensajes",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "30"
+      }
+    }
+  }
 }

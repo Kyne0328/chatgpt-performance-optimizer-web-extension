@@ -1,4 +1,4 @@
-/* Rel.AI Companion — compact popup */
+/* Rel.AI Companion — minimalist popup */
 (() => {
   'use strict';
 
@@ -36,8 +36,6 @@
 
   const I18N = window.RELAI_I18N;
   const prefControls = Array.from(document.querySelectorAll('[data-pref]'));
-  const exportButtons = Array.from(document.querySelectorAll('[data-export-format]'));
-  const selectedExportButtons = Array.from(document.querySelectorAll('[data-selected-export]'));
 
   const connectionBadge = $('connectionBadge');
   const connectionText = $('connectionText');
@@ -51,18 +49,12 @@
   const statMemory = $('statMemory');
   const lastCleanStat = $('lastCleanStat');
   const lastCleanValue = $('lastCleanValue');
-  const exportConnectionText = $('exportConnectionText');
 
   const trackerToggle = $('trackerToggle');
   const trackerMsg = $('trackerMsg');
-  const selModeToggle = $('selModeToggle');
-  const exportSelRow = $('exportSelRow');
-  const selCount = $('selCount');
-  const copyMdBtn = $('copyMdBtn');
-  const copyTxtBtn = $('copyTxtBtn');
 
   const langSelect = $('langSelect');
-  const exportSettingsBtn = $('exportSettingsBtn');
+  const backupSettingsBtn = $('backupSettingsBtn');
   const importSettingsBtn = $('importSettingsBtn');
   const resetSettingsBtn = $('resetSettingsBtn');
   const resetSettingsHint = $('resetSettingsHint');
@@ -115,7 +107,10 @@
     control.dataset.state = enabled ? 'on' : 'off';
     control.setAttribute('role', 'switch');
     control.setAttribute('aria-checked', String(enabled));
-    control.querySelectorAll('[data-state-label]').forEach(label => { label.textContent = enabled ? 'On' : 'Off'; });
+    control.querySelectorAll('[data-state-label]').forEach(label => {
+      label.textContent = enabled ? 'On' : 'Off';
+      label.setAttribute('aria-hidden', 'true');
+    });
   }
 
   function paintPref(key, enabled) {
@@ -176,10 +171,12 @@
       showTrackerMessage(t('trackerStateUnknown'));
       return null;
     }
+
     trackerToggle.disabled = false;
     currentPrefs.blockTrackersNet = state.effective;
     paintControl(trackerToggle, state.effective);
     showTrackerMessage(trackerReasonText(state.reason));
+
     if (state.reason === 'denied' || state.reason === 'revoked') {
       runtime?.sendMessage({ action: 'CLEAR_TRACKER_PENDING', reason: state.reason }).catch(() => {});
     }
@@ -191,6 +188,7 @@
     trackerBusy = true;
     const wantEnabled = !currentPrefs.blockTrackersNet;
     showTrackerMessage('');
+
     try {
       if (wantEnabled) {
         await storage?.set({ trackerPending: true, trackerPendingAt: Date.now() });
@@ -203,6 +201,7 @@
           return;
         }
       }
+
       const result = await runtime?.sendMessage({ action: 'SET_TRACKER_BLOCKING', enabled: wantEnabled });
       if (!result?.success) {
         const message = trackerReasonText(result?.state?.reason) || t('trackerBlockError');
@@ -224,25 +223,21 @@
     connectionBadge.dataset.state = connected ? 'connected' : 'idle';
     connectionText.textContent = connected ? 'Connected to ChatGPT' : 'ChatGPT not open';
     homeStatusText.textContent = connected
-      ? 'Conversation tools are ready for the active ChatGPT tab.'
+      ? 'Rel.AI Companion is active on the current ChatGPT tab.'
       : 'Open ChatGPT to use conversation tools.';
-    openChatBtn.textContent = connected ? 'Export' : 'Open ChatGPT';
+    openChatBtn.textContent = connected ? 'Go to ChatGPT' : 'Open ChatGPT';
     openChatBtn.dataset.connected = String(connected);
-    exportConnectionText.textContent = connected
-      ? 'Export or copy the active conversation.'
-      : 'Open a ChatGPT conversation to export it.';
-    exportButtons.forEach(button => { button.disabled = !connected; });
-    copyMdBtn.disabled = !connected;
-    copyTxtBtn.disabled = !connected;
-    selModeToggle.disabled = !connected;
   }
 
-  openChatBtn.addEventListener('click', () => {
+  openChatBtn.addEventListener('click', async () => {
     if (cachedChatTab) {
-      document.getElementById('exportSection')?.scrollIntoView({ block: 'start' });
-      return;
+      try {
+        await globalThis.chrome.tabs.update(cachedChatTab.id, { active: true });
+        if (cachedChatTab.windowId) await globalThis.chrome.windows?.update(cachedChatTab.windowId, { focused: true });
+        return;
+      } catch {}
     }
-    try { globalThis.chrome.tabs.create({ url: 'https://chatgpt.com/' }); }
+    try { await globalThis.chrome.tabs.create({ url: 'https://chatgpt.com/' }); }
     catch { window.open('https://chatgpt.com/', '_blank', 'noopener'); }
   });
 
@@ -255,8 +250,6 @@
   function renderStats(stats) {
     if (!stats || typeof stats.total !== 'number') return showEmptyStats();
     summarySection.hidden = false;
-    statsRow.hidden = false;
-    noStats.hidden = true;
     statTotal.textContent = stats.total;
     statRendered.textContent = stats.rendered ?? stats.total;
     statMemory.textContent = stats.cleanMemory ? 'On' : 'Off';
@@ -274,42 +267,13 @@
 
   async function refreshLiveData() {
     if (!cachedChatTab || document.hidden) return;
-    const tasks = [
+    await Promise.all([
       globalThis.chrome.tabs.sendMessage(cachedChatTab.id, { action: 'GET_STATS' }).then(renderStats).catch(showEmptyStats),
       globalThis.chrome.tabs.sendMessage(cachedChatTab.id, { action: 'GET_PERF_METRICS' }).then(metrics => {
         if (metrics && !metrics.error) renderLastClean(metrics.lastClean);
       }).catch(() => {})
-    ];
-    if (selModeToggle.getAttribute('aria-checked') === 'true') {
-      tasks.push(globalThis.chrome.tabs.sendMessage(cachedChatTab.id, { action: 'GET_SEL_COUNT' }).then(result => {
-        if (typeof result?.count === 'number') updateSelectionCount(result.count);
-      }).catch(() => {}));
-    }
-    await Promise.all(tasks);
+    ]);
   }
-
-  async function sendExport(format, selectedOnly) {
-    if (!cachedChatTab) return showToast('Open a ChatGPT conversation first', 'warning');
-    const button = selectedOnly
-      ? selectedExportButtons.find(item => item.dataset.selectedExport === format)
-      : exportButtons.find(item => item.dataset.exportFormat === format);
-    if (button) button.disabled = true;
-    try {
-      const result = await globalThis.chrome.tabs.sendMessage(cachedChatTab.id, {
-        action: selectedOnly ? 'EXPORT_SEL' : 'EXPORT_ALL', format
-      });
-      if (result?.error === 'no_messages') showToast(t('noMessages'), 'warning');
-      else if (result?.error) showToast(t('exportError'), 'error');
-      else showToast(`${format.toUpperCase()} export started`, 'success');
-    } catch {
-      showToast(t('exportError'), 'error');
-    } finally {
-      if (button) button.disabled = selectedOnly ? Number(selCount.dataset.count || 0) <= 0 : false;
-    }
-  }
-
-  exportButtons.forEach(button => button.addEventListener('click', () => sendExport(button.dataset.exportFormat, false)));
-  selectedExportButtons.forEach(button => button.addEventListener('click', () => sendExport(button.dataset.selectedExport, true)));
 
   async function writeClipboard(text) {
     try { await navigator.clipboard.writeText(text); return true; }
@@ -328,44 +292,6 @@
     }
   }
 
-  async function copyConversation(format, button) {
-    if (!cachedChatTab) return showToast('Open a ChatGPT conversation first', 'warning');
-    button.disabled = true;
-    try {
-      const result = await globalThis.chrome.tabs.sendMessage(cachedChatTab.id, { action: 'COPY_ALL', format });
-      if (!result?.success || typeof result.text !== 'string') throw new Error(result?.error || 'copy_failed');
-      const copied = await writeClipboard(result.text);
-      if (!copied) throw new Error('clipboard_failed');
-      showToast(format === 'txt' ? 'Plain text copied' : 'Markdown copied', 'success');
-    } catch (error) {
-      showToast(error.message === 'no_messages' ? t('noMessages') : 'Could not copy conversation', 'error');
-    } finally { button.disabled = false; }
-  }
-
-  copyMdBtn.addEventListener('click', () => copyConversation('md', copyMdBtn));
-  copyTxtBtn.addEventListener('click', () => copyConversation('txt', copyTxtBtn));
-
-  function updateSelectionCount(count) {
-    selCount.dataset.count = String(count);
-    selCount.textContent = t('selSelected', [String(count)]);
-    selectedExportButtons.forEach(button => { button.disabled = count <= 0; });
-  }
-
-  function paintSelectionMode(enabled) {
-    selModeToggle.setAttribute('aria-checked', String(enabled));
-    selModeToggle.querySelector('[data-state-label]').textContent = enabled ? 'On' : 'Off';
-    exportSelRow.hidden = !enabled;
-    if (!enabled) updateSelectionCount(0);
-  }
-
-  selModeToggle.addEventListener('click', async () => {
-    if (!cachedChatTab || selModeToggle.disabled) return;
-    const enabled = selModeToggle.getAttribute('aria-checked') !== 'true';
-    paintSelectionMode(enabled);
-    try { await globalThis.chrome.tabs.sendMessage(cachedChatTab.id, { action: 'TOGGLE_SEL_MODE', enabled }); }
-    catch { showToast('Could not change selection mode', 'error'); }
-  });
-
   function sanitizeImportedPrefs(input) {
     const output = {};
     for (const [key, defaultValue] of Object.entries(DEFAULT_PREFS)) {
@@ -375,14 +301,14 @@
     return output;
   }
 
-  async function exportSettings() {
+  async function backupSettings() {
     try {
       const tracker = await askTrackerState();
       const payload = {
         schema: 'relai-companion-settings',
         schemaVersion: 1,
         extensionVersion: runtime?.getManifest?.().version || '1.0.0',
-        exportedAt: new Date().toISOString(),
+        savedAt: new Date().toISOString(),
         preferences: { ...currentPrefs, blockTrackersNet: !!tracker?.effective },
         uiLang: currentLang
       };
@@ -395,21 +321,23 @@
       anchor.click();
       anchor.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      showToast('Settings backup exported', 'success');
-    } catch { showToast('Could not export settings', 'error'); }
+      showToast('Settings backup saved', 'success');
+    } catch { showToast('Could not back up settings', 'error'); }
   }
 
-  async function importSettings(file) {
+  async function restoreSettings(file) {
     try {
       const parsed = JSON.parse(await file.text());
       if (!parsed || parsed.schema !== 'relai-companion-settings' || typeof parsed.preferences !== 'object') throw new Error('invalid');
       const prefs = sanitizeImportedPrefs(parsed.preferences);
       if (!(await savePrefs(prefs))) return;
+
       if (typeof parsed.uiLang === 'string' && Array.from(langSelect.options).some(option => option.value === parsed.uiLang)) {
         currentLang = parsed.uiLang;
         langSelect.value = currentLang;
         await storage?.set({ uiLang: currentLang });
       }
+
       if (parsed.preferences.blockTrackersNet === false) {
         await runtime?.sendMessage({ action: 'SET_TRACKER_BLOCKING', enabled: false }).catch(() => {});
       }
@@ -419,11 +347,11 @@
     finally { settingsFileInput.value = ''; }
   }
 
-  exportSettingsBtn.addEventListener('click', exportSettings);
+  backupSettingsBtn.addEventListener('click', backupSettings);
   importSettingsBtn.addEventListener('click', () => settingsFileInput.click());
   settingsFileInput.addEventListener('change', () => {
     const file = settingsFileInput.files?.[0];
-    if (file) importSettings(file);
+    if (file) restoreSettings(file);
   });
 
   resetSettingsBtn.addEventListener('click', async () => {
@@ -434,13 +362,14 @@
       clearTimeout(resetTimer);
       resetTimer = setTimeout(() => {
         resetArmed = false;
-        resetSettingsHint.textContent = 'Restore v1 defaults';
+        resetSettingsHint.textContent = 'Restore version 1 defaults';
       }, 4000);
       return;
     }
+
     resetArmed = false;
     clearTimeout(resetTimer);
-    resetSettingsHint.textContent = 'Restore v1 defaults';
+    resetSettingsHint.textContent = 'Restore version 1 defaults';
     const prefs = { ...DEFAULT_PREFS };
     delete prefs.blockTrackersNet;
     if (!(await savePrefs(prefs))) return;
@@ -454,7 +383,6 @@
   langSelect.addEventListener('change', async () => {
     currentLang = langSelect.value;
     await storage?.set({ uiLang: currentLang });
-    updateSelectionCount(Number(selCount.dataset.count || 0));
   });
 
   function browserLabel() {
@@ -483,11 +411,19 @@
     }
     const tracker = await askTrackerState();
     return {
-      generatedAt: new Date().toISOString(), extensionVersion: version, browser: browserLabel(),
-      chatgptTab: isChat, contentBridge: !!stats && typeof stats.total === 'number',
+      generatedAt: new Date().toISOString(),
+      extensionVersion: version,
+      browser: browserLabel(),
+      chatgptTab: isChat,
+      contentBridge: !!stats && typeof stats.total === 'number',
       conversation: stats && !stats.error ? stats : null,
       performance: metrics && !metrics.error ? metrics : null,
-      tracker: tracker ? { supported: tracker.supported, effective: tracker.effective, hasPermission: tracker.hasPermission, reason: tracker.reason || null } : null
+      tracker: tracker ? {
+        supported: tracker.supported,
+        effective: tracker.effective,
+        hasPermission: tracker.hasPermission,
+        reason: tracker.reason || null
+      } : null
     };
   }
 
@@ -503,7 +439,11 @@
     setDiagnostic(diagTracker, trackerText, diagnostics.tracker?.effective ? 'ok' : 'muted');
   }
 
-  refreshDiagnosticsBtn.addEventListener('click', async () => { await refreshDiagnostics(); showToast('Diagnostics refreshed', 'success'); });
+  refreshDiagnosticsBtn.addEventListener('click', async () => {
+    await refreshDiagnostics();
+    showToast('Diagnostics refreshed', 'success');
+  });
+
   copyDiagnosticsBtn.addEventListener('click', async () => {
     if (!lastDiagnostics) await refreshDiagnostics();
     const ok = await writeClipboard(JSON.stringify(lastDiagnostics, null, 2));
@@ -514,6 +454,7 @@
     try { globalThis.chrome.tabs.create({ url }); }
     catch { window.open(url, '_blank', 'noopener'); }
   }
+
   githubBtn.addEventListener('click', () => openExternal('https://github.com/Kyne0328/chatgpt-performance-optimizer-web-extension'));
   websiteBtn.addEventListener('click', () => openExternal('https://kyne.is-a.dev/'));
 
@@ -538,27 +479,25 @@
     } catch {}
 
     setConnectedUI(!!cachedChatTab);
-    updateSelectionCount(0);
 
     if (cachedChatTab) {
-      try {
-        const state = await globalThis.chrome.tabs.sendMessage(cachedChatTab.id, { action: 'GET_SEL_MODE_STATE' });
-        paintSelectionMode(!!state?.enabled);
-        if (state?.enabled) updateSelectionCount(Number(state.count || 0));
-      } catch { paintSelectionMode(false); }
       await refreshLiveData();
       liveTimer = setInterval(refreshLiveData, 2500);
     } else {
       showEmptyStats();
-      paintSelectionMode(false);
     }
 
     refreshDiagnostics();
   }
 
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshLiveData(); });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshLiveData();
+  });
+
   window.addEventListener('pagehide', () => {
-    clearInterval(liveTimer); clearTimeout(toastTimer); clearTimeout(resetTimer);
+    clearInterval(liveTimer);
+    clearTimeout(toastTimer);
+    clearTimeout(resetTimer);
   });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });

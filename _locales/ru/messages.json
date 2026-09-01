@@ -1,10 +1,10 @@
 {
-   "extDescription": {
-      "description": "Описание расширения",
-      "message": "Переходы между репликами, монитор производительности, умная очистка памяти и экспорт в TXT/MD/PDF/Word."
-   },
-   "extName": {
-      "description": "Название расширения",
-      "message": "Rel.AI Companion"
-   }
+  "extDescription": {
+    "description": "Описание расширения",
+    "message": "Навигация по длинным чатам, управление памятью, настройка производительности и дополнительные функции конфиденциальности в ChatGPT."
+  },
+  "extName": {
+    "description": "Название расширения",
+    "message": "Rel.AI Companion"
+  }
 }

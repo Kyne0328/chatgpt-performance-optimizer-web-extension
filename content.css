@@ -3,14 +3,6 @@
 @keyframes relai-spin{to{transform:rotate(360deg)}}
 .relai-spinner{display:none;width:18px;height:18px;flex:0 0 18px;border:2px solid rgba(127,127,127,.18);border-top-color:#8f83ff;border-radius:50%;animation:relai-spin .65s linear infinite}
 
-/* Selection mode */
-html.relai-sel-mode [data-testid^="conversation-turn-"]{position:relative}
-.relai-sel-label{position:absolute;top:10px;left:10px;z-index:2;display:grid;place-items:center;width:30px;height:30px;border:1px solid rgba(124,108,255,.25);border-radius:10px;background:rgba(15,17,22,.88);box-shadow:0 8px 24px rgba(0,0,0,.2);backdrop-filter:blur(10px);cursor:pointer;transition:transform 120ms ease,border-color 120ms ease,background 120ms ease}
-.relai-sel-label:hover{transform:translateY(-1px);border-color:rgba(124,108,255,.55);background:rgba(25,28,36,.95)}
-.relai-sel-label input{width:15px;height:15px;margin:0;accent-color:#7c6cff;cursor:pointer}
-.relai-sel-label.relai-sel-checked{border-color:#7c6cff;background:rgba(124,108,255,.24)}
-.relai-sel-label:focus-within{outline:2px solid #9f96ff;outline-offset:2px}
-
 /* Turn Navigator */
 .relai-nav{position:fixed;right:14px;top:50%;z-index:99999;display:grid;grid-template-columns:1fr;gap:4px;transform:translateY(-50%);padding:6px;border:1px solid rgba(124,108,255,.22);border-radius:18px;background:rgba(13,15,19,.9);box-shadow:0 18px 45px rgba(0,0,0,.3);backdrop-filter:blur(16px);font-family:ui-sans-serif,system-ui,sans-serif;user-select:none}
 .relai-nav::before{display:block;width:18px;height:2px;margin:2px auto 3px;border-radius:999px;background:linear-gradient(90deg,#7c6cff,#4ea7ff);content:""}
@@ -40,8 +32,7 @@ pre[data-relai-collapsed]:not(.relai-code-collapsed) .relai-code-toggle{position
   .relai-nav,.relai-hud{background:rgba(248,249,251,.94);border-color:rgba(90,79,210,.18);box-shadow:0 16px 40px rgba(25,30,40,.14)}
   .relai-nav-btn{color:#5c6572}.relai-nav-btn:hover{color:#6658db;background:rgba(124,108,255,.1)}.relai-nav-count{color:#7b8490}
   .relai-hud{color:#1c222b}.relai-hud-head{border-bottom-color:rgba(0,0,0,.06)}.relai-hud-k{color:#747e8c}.relai-hud-v{color:#252c36}.relai-hud-min{color:#737d89}.relai-hud-min:hover{background:rgba(0,0,0,.05);color:#272e38}
-  .relai-sel-label{background:rgba(255,255,255,.94);box-shadow:0 7px 20px rgba(25,30,40,.12)}
   .relai-code-toggle{background:rgba(250,250,252,.94);color:#6658db;box-shadow:0 6px 18px rgba(25,30,40,.13)}
 }
 
-@media(prefers-reduced-motion:reduce){.relai-spinner{animation-duration:1.4s}.relai-nav-btn,.relai-sel-label,.relai-img-load{transition:none}}
+@media(prefers-reduced-motion:reduce){.relai-spinner{animation-duration:1.4s}.relai-nav-btn,.relai-img-load{transition:none}}

@@ -1,10 +1,10 @@
 {
-   "extDescription": {
-      "description": "Beschreibung der Erweiterung",
-      "message": "Zwischen Turns springen, Leistung überwachen, Speicher leeren und ChatGPT als TXT/MD/PDF/Word exportieren."
-   },
-   "extName": {
-      "description": "Name der Erweiterung",
-      "message": "Rel.AI Companion"
-   }
+  "extDescription": {
+    "description": "Beschreibung der Erweiterung",
+    "message": "Navigiere durch lange Chats, verwalte den Speicher, optimiere die Leistung und steuere optionale Datenschutzfunktionen in ChatGPT."
+  },
+  "extName": {
+    "description": "Name der Erweiterung",
+    "message": "Rel.AI Companion"
+  }
 }

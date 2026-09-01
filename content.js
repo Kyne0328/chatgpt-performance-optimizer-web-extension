@@ -1,6 +1,6 @@
 /**
  * Rel.AI Companion — ChatGPT integration
- * Applies user-selected workspace, performance, export, and navigation tools.
+ * Applies user-selected workspace, performance, privacy, and navigation tools.
  */
 (() => {
   'use strict';
@@ -535,32 +535,6 @@
         applyPreferences(msg.prefs);
         sendResponse({ ok: true });
         break;
-      case 'TOGGLE_SEL_MODE':
-        toggleSelectionMode(msg.enabled);
-        sendResponse({ ok: true });
-        break;
-      case 'GET_SEL_COUNT':
-        sendResponse({ count: selectedIds.size });
-        break;
-      case 'GET_SEL_MODE_STATE':
-        // Returns persistent state so popup can restore UI on reopen
-        sendResponse({ enabled: selectionMode, count: selectedIds.size });
-        break;
-      case 'EXPORT_ALL':
-        // Fully-mounted chats: handleExport runs synchronously up to the export
-        // trigger (PDF gesture preserved). Virtualized long chats: it awaits a
-        // scroll-collect pass, then resolves. return true keeps the channel open.
-        handleExport(msg.format, false)
-          .then(sendResponse, err => sendResponse({ error: err.message }));
-        return true;
-      case 'EXPORT_SEL':
-        handleExport(msg.format, true)
-          .then(sendResponse, err => sendResponse({ error: err.message }));
-        return true;
-      case 'COPY_ALL':
-        handleCopyAll(msg.format)
-          .then(sendResponse, err => sendResponse({ error: err.message }));
-        return true;
       case 'GET_PERF_METRICS':
         getPerfMetrics().then(sendResponse);
         return true;
@@ -2239,9 +2213,6 @@
 
   async function main() {
     log('Initializing...');
-
-    // Inject main-world helper FIRST so it's ready before any export
-    injectMainWorldHelper();
 
     await loadStoredState();
 
