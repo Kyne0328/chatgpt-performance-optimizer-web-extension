@@ -464,53 +464,12 @@ async function handleMessage(msg) {
   }
 }
 
-// --- Badge: show "ON" when on ChatGPT ---
-
-const CHATGPT_PATTERNS = ['chatgpt.com', 'chat.openai.com'];
-
-function isChatGPTUrl(url) {
-  if (!url) return false;
-  return CHATGPT_PATTERNS.some(p => url.includes(p));
-}
-
-async function updateBadge(tabId, url) {
-  try {
-    if (isChatGPTUrl(url)) {
-      await chrome.action.setBadgeText({ text: 'ON', tabId });
-      await chrome.action.setBadgeBackgroundColor({ color: '#10a37f', tabId });
-    } else {
-      await chrome.action.setBadgeText({ text: '', tabId });
-    }
-  } catch (_) {
-    // Tab may have closed or have no action — ignore (avoids unhandled rejection)
-  }
-}
-
-chrome.tabs.onActivated.addListener(async ({ tabId }) => {
-  try {
-    const tab = await chrome.tabs.get(tabId);
-    await updateBadge(tabId, tab.url);
-  } catch {}
-});
-
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.url || changeInfo.status === 'complete') {
-    await updateBadge(tabId, tab.url);
-  }
-});
-
 // Dynamic DNR rules outlive the service worker, so they can drift out of sync
 // while nothing is running, so every worker wake-up re-checks the invariants.
 // Idempotent: reconcile only
 // writes when the desired state differs from the installed one.
 reconcileTrackerBlocking();
 
-// URL-filtered query works via host_permissions (no "tabs" permission needed)
-// and only returns ChatGPT tabs with a readable url.
-chrome.tabs.query({
-  url: ['https://chatgpt.com/*', 'https://chat.openai.com/*']
-}, (tabs) => {
-  for (const tab of tabs) {
-    updateBadge(tab.id, tab.url);
-  }
-});
+// Clear any badge text left by earlier versions. The toolbar icon now stands
+// on its own without an "ON" label.
+chrome.action.setBadgeText({ text: '' }).catch(() => {});
