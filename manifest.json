@@ -19,19 +19,19 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_popup": "popup/popup.html"
+    "default_popup": "popup/app.html"
   },
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "css": ["content.css"],
+      "css": ["content.css", "features.css"],
       "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
       "run_at": "document_start"
     },
     {
-      "js": ["shared/i18n-data.js", "content.js"],
+      "js": ["shared/i18n-data.js", "content.js", "features.js"],
       "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
       "run_at": "document_end"
     }
