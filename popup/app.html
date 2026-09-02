@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rel.AI Companion</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><img src="../icons/icon128.png" alt="" width="30" height="30"><div><h1>Rel.AI Companion</h1><p id="connectionText">Checking ChatGPT…</p></div></div>
+    <button id="openChatBtn" type="button">Open ChatGPT</button>
+  </header>
+
+  <main>
+    <section class="mode">
+      <div><strong>Optimization mode</strong><small>Choose a starting point. Any manual change becomes Custom.</small></div>
+      <select id="presetSelect" aria-label="Optimization mode"><option value="balanced">Balanced</option><option value="performance">Performance</option><option value="privacy">Privacy</option><option value="minimal">Minimal</option><option value="custom">Custom</option></select>
+    </section>
+
+    <section id="healthCard" class="health" hidden>
+      <div class="health-head"><div><strong>Session health</strong><small>Local heuristic from memory, DOM size, chat length, and recent long tasks.</small></div><span><b id="healthLabel">Good</b> <em id="healthScore">0/100</em></span></div>
+      <div class="health-grid"><div><small>Memory</small><strong id="healthMemory">—</strong><em id="healthMemoryDelta">—</em></div><div><small>DOM nodes</small><strong id="healthDom">—</strong><em id="healthDomDelta">—</em></div><div><small>Turns</small><strong id="healthTurns">—</strong><em>current chat</em></div></div>
+    </section>
+
+    <section class="panel">
+      <div class="heading"><h2>Conversation</h2><p>Navigate, search, and organize long chats.</p></div>
+      <button class="toggle" data-pref="navigatorEnabled"><span><strong>Conversation Navigator</strong><small>Use the thin rail to move between your prompts.</small></span><i>On</i></button>
+      <button class="action" id="searchBtn"><span><strong>Search this conversation</strong><small>Search locally across loaded turns.</small></span><b>Open</b></button>
+      <button class="action" id="bookmarkBtn"><span><strong>Bookmark current prompt</strong><small>Save your current position for later.</small></span><b><span id="bookmarkCount">0</span> saved</b></button>
+      <button class="action" id="outlineBtn"><span><strong>Conversation outline</strong><small>Browse your prompts as a local outline.</small></span><b>Open</b></button>
+      <button class="toggle" id="focusToggle"><span><strong>Focus Mode</strong><small>Hide surrounding ChatGPT chrome and center the conversation.</small></span><i>Off</i></button>
+      <button class="action" id="paletteBtn"><span><strong>Command palette</strong><small>Search messages, bookmarks, health, and actions.</small></span><b>Ctrl Shift K</b></button>
+    </section>
+
+    <section class="panel">
+      <div class="heading"><h2>Session</h2><p>Manage long-running ChatGPT tabs without guessing at raw metrics.</p></div>
+      <button class="toggle" data-pref="cleanMemoryEnabled"><span><strong>Memory Reset on chat switch</strong><small>Reload when switching conversations to release accumulated tab memory.</small></span><i>On</i></button>
+      <button class="toggle" data-pref="cleanMemorySmart"><span><strong>Smart switch reset</strong><small>Reset on chat switch only when the current tab appears heavy.</small></span><i>Off</i></button>
+      <button class="toggle" id="autoManageToggle"><span><strong>Automatic session management</strong><small>Warn first, then reload only at the selected health threshold.</small></span><i>Off</i></button>
+      <label class="select-row"><span><strong>Automatic reset sensitivity</strong><small>Conservative waits longer; Aggressive reacts earlier.</small></span><select id="autoMode"><option value="conservative">Conservative</option><option value="balanced">Balanced</option><option value="aggressive">Aggressive</option></select></label>
+      <button class="toggle" id="healthWarningsToggle"><span><strong>Session health warnings</strong><small>Show a small warning when session health reaches Critical.</small></span><i>On</i></button>
+      <button class="toggle" data-pref="hideNotifications"><span><strong>Quiet Mode</strong><small>Hide ChatGPT banners, notices, and announcement popups.</small></span><i>Off</i></button>
+    </section>
+
+    <details class="panel" open>
+      <summary><span><strong>Performance</strong><small>Reduce unnecessary rendering and loading work.</small></span><b>⌄</b></summary>
+      <div class="body">
+        <button class="toggle" data-pref="perfResourceHints"><span><strong>Preconnect Resources</strong><small>Prepare asset connections earlier.</small></span><i>On</i></button>
+        <button class="toggle" data-pref="perfReduceAnim"><span><strong>Reduce Animations</strong><small>Shorten decorative transitions and motion.</small></span><i>On</i></button>
+        <button class="toggle" data-pref="perfOptimizeDom"><span><strong>Contain Chat Layout</strong><small>Limit layout recalculation inside conversation turns.</small></span><i>On</i></button>
+        <button class="toggle" data-pref="perfLazyImg"><span><strong>Lazy-load Images</strong><small>Delay off-screen image loading until useful.</small></span><i>On</i></button>
+        <button class="toggle" data-pref="perfDeferScripts"><span><strong>Defer Off-screen Media</strong><small>Lower priority for embedded media outside the viewport.</small></span><i>Off</i></button>
+        <button class="toggle" data-pref="perfFontSwap"><span><strong>Font Optimization</strong><small>Avoid synthetic font rendering where possible.</small></span><i>On</i></button>
+      </div>
+    </details>
+
+    <details class="panel">
+      <summary><span><strong>Privacy &amp; Advanced</strong><small>Optional controls and experimental behavior.</small></span><b>⌄</b></summary>
+      <div class="body">
+        <button class="toggle" data-pref="perfBlockTrackers"><span><strong>Page Tracking Cleanup</strong><small>Remove known analytics elements after they appear.</small></span><i>Off</i></button>
+        <button class="toggle" id="networkToggle"><span><strong>Network Privacy</strong><small>Block selected analytics domains using browser network rules.</small></span><i>Off</i></button>
+        <p id="networkStatus" class="note" hidden></p>
+        <button class="toggle" data-pref="perfKeepSession"><span><strong>Session Check</strong><small>Periodically request ChatGPT session state. Experimental; it is not claimed to extend login time.</small></span><i>Off</i></button>
+        <button class="toggle" data-pref="hudEnabled"><span><strong>Session Stats</strong><small>Show a compact live memory and responsiveness chip.</small></span><i>Off</i></button>
+        <button class="toggle" id="navPreviewToggle"><span><strong>Navigator previews</strong><small>Preview prompts and show bookmark/search markers.</small></span><i>On</i></button>
+        <button class="toggle" id="paletteShortcutToggle"><span><strong>Command palette shortcut</strong><small>Enable Ctrl+Shift+K inside ChatGPT.</small></span><i>On</i></button>
+        <button class="toggle" data-pref="hideThinking"><span><strong>Hide Reasoning</strong><small>Hide standalone reasoning rows when detected.</small></span><i>Off</i></button>
+        <button class="toggle" data-pref="clickToLoadImg"><span><strong>Manual Images</strong><small>Keep off-screen images unloaded until requested.</small></span><i>Off</i></button>
+        <button class="toggle" data-pref="prefetchNav"><span><strong>Quick Open</strong><small>Ask Chromium to prepare conversations on hover. The browser may decline.</small></span><i>Off</i></button>
+      </div>
+    </details>
+
+    <details class="panel">
+      <summary><span><strong>Settings &amp; Diagnostics</strong><small>Local data, compatibility checks, and support information.</small></span><b>⌄</b></summary>
+      <div class="body settings">
+        <div class="diagnostics">
+          <div><span>Conversation DOM</span><strong id="diagTurns">Checking</strong></div><div><span>Navigator</span><strong id="diagNav">Checking</strong></div><div><span>Memory metrics</span><strong id="diagMemory">Checking</strong></div><div><span>Quick Open</span><strong id="diagQuick">Checking</strong></div><div><span>Session Check</span><strong id="diagSession">Info</strong></div>
+        </div>
+        <div class="buttons"><button id="compatBtn" type="button">Run compatibility test</button><button id="copyDiagBtn" type="button">Copy diagnostics</button></div>
+        <div class="buttons"><button id="backupBtn" type="button">Back up settings</button><button id="restoreBtn" type="button">Restore settings</button><button id="resetBtn" class="danger" type="button">Reset</button></div>
+        <label class="sr-only" for="fileInput">Choose a Rel.AI settings backup file</label><input id="fileInput" type="file" accept="application/json,.json" hidden>
+      </div>
+    </details>
+  </main>
+
+  <footer><span>v1.0.0</span><span>·</span><button id="githubBtn">GitHub</button><span>·</span><button id="siteBtn">Kyne0328</button></footer>
+  <div id="toast" class="toast" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>
