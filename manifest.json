@@ -31,7 +31,7 @@
       "run_at": "document_start"
     },
     {
-      "js": ["shared/i18n-data.js", "content.js", "features.js"],
+      "js": ["shared/i18n-data.js", "content.js", "features.js", "features-keyboard.js"],
       "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
       "run_at": "document_end"
     }
