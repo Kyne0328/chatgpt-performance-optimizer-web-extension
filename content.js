@@ -539,7 +539,7 @@
         getPerfMetrics().then(sendResponse);
         return true;
       default:
-        sendResponse({ ok: false });
+        return false; // Allow other listeners to handle unrelated messages.
     }
     return true;
   });
