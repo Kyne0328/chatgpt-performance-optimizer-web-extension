@@ -1,0 +1,45 @@
+/* Rel.AI Companion — productivity layer */
+
+.relai-nav.relai-nav-enhanced .relai-nav-count{display:none!important}
+.relai-nav-markers{position:absolute;top:14px;bottom:14px;left:50%;width:24px;transform:translateX(-50%);pointer-events:none}
+.relai-nav-marker{appearance:none;position:absolute;left:50%;z-index:2;width:9px;height:9px;margin:0;padding:0;transform:translate(-50%,-50%);border:1px solid #171717;border-radius:50%;background:#f0f0f0;box-shadow:0 0 0 1px rgba(255,255,255,.2);pointer-events:auto;cursor:pointer}
+.relai-nav-marker-bookmark{width:10px;height:10px;background:#3b9eff}
+.relai-nav-marker-search{border-radius:2px;background:#f0b429}
+.relai-nav-marker-bookmark.relai-nav-marker-search{background:linear-gradient(135deg,#3b9eff 50%,#f0b429 50%)}
+.relai-nav-preview{position:absolute;right:38px;z-index:4;width:220px;max-width:calc(100vw - 72px);padding:7px 9px;transform:translateY(-50%);border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#212121;color:#ddd;box-shadow:0 8px 24px rgba(0,0,0,.26);font:500 11px/1.35 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;pointer-events:none}
+.relai-nav-preview[hidden]{display:none}
+.relai-nav.relai-light .relai-nav-marker{border-color:#fff;background:#303030;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.relai-nav.relai-light .relai-nav-marker-bookmark{background:#087ccf}.relai-nav.relai-light .relai-nav-marker-search{background:#b87900}.relai-nav.relai-light .relai-nav-preview{border-color:rgba(0,0,0,.1);background:#fff;color:#303030;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+
+.relai-palette-backdrop{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:flex-start;justify-content:center;padding:12vh 18px 18px;background:rgba(0,0,0,.42);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.relai-palette-backdrop[hidden]{display:none}
+.relai-palette{width:min(620px,100%);overflow:hidden;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:#212121;color:#ececec;box-shadow:0 24px 70px rgba(0,0,0,.4)}
+.relai-palette-input-wrap{display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid rgba(255,255,255,.1)}
+.relai-palette-input{flex:1;min-width:0;height:42px;padding:0 2px;border:0;outline:0;background:transparent;color:#f3f3f3;font:500 15px/1.2 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.relai-palette-input::placeholder{color:#8d8d8d}.relai-palette-input-wrap kbd{padding:3px 6px;border:1px solid rgba(255,255,255,.13);border-radius:5px;background:#2a2a2a;color:#9a9a9a;font:500 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace}
+.relai-palette-meta{padding:8px 13px 5px;color:#8e8e8e;font-size:11px}
+.relai-palette-results{max-height:min(52vh,430px);overflow:auto;padding:5px 7px 8px}
+.relai-palette-row{appearance:none;display:flex;width:100%;min-height:50px;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:inherit;cursor:pointer;text-align:left}
+.relai-palette-row:hover,.relai-palette-row[data-selected="true"]{background:#2f2f2f}.relai-palette-row:focus-visible{outline:2px solid #4aa9ff;outline-offset:-2px}
+.relai-palette-row strong{font-size:13px;font-weight:600}.relai-palette-row small{color:#9b9b9b;font-size:11px;line-height:1.35}.relai-palette-empty{padding:24px 12px;color:#8d8d8d;text-align:center;font-size:12px}
+.relai-palette-footer{display:flex;gap:14px;padding:8px 12px;border-top:1px solid rgba(255,255,255,.08);color:#787878;font-size:10px}
+
+.relai-health-notice{position:fixed;right:18px;bottom:18px;z-index:2147483645;display:grid;width:min(340px,calc(100vw - 36px));gap:6px;padding:12px 13px;border:1px solid rgba(255,255,255,.13);border-radius:10px;background:#212121;color:#ececec;box-shadow:0 10px 30px rgba(0,0,0,.3);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.relai-health-notice strong{font-size:13px}.relai-health-notice>span{color:#a9a9a9;font-size:11px;line-height:1.4}.relai-health-actions{display:flex;gap:7px;margin-top:3px}.relai-health-actions button{appearance:none;min-height:34px;padding:0 10px;border:1px solid rgba(255,255,255,.13);border-radius:7px;background:#2c2c2c;color:#ededed;cursor:pointer;font:600 11px ui-sans-serif,system-ui,sans-serif}.relai-health-actions button:first-child{border-color:#0d8fe8;background:#0d8fe8;color:#fff}.relai-health-actions button:hover{filter:brightness(1.08)}
+
+html.relai-focus-mode body{background:var(--main-surface-primary,#171717)!important}
+html.relai-focus-mode #stage-slideover-sidebar,
+html.relai-focus-mode [data-testid="sidebar"],
+html.relai-focus-mode aside,
+html.relai-focus-mode nav[aria-label*="Chat" i],
+html.relai-focus-mode [data-testid="conversation-header"],
+html.relai-focus-mode [data-testid="open-sidebar-button"]{display:none!important}
+html.relai-focus-mode main{max-width:none!important;margin-inline:auto!important}
+html.relai-focus-mode main [class*="max-w-"]{max-width:min(980px,calc(100vw - 48px))!important}
+
+.relai-palette-backdrop.relai-light .relai-palette{border-color:rgba(0,0,0,.11);background:#fff;color:#202020;box-shadow:0 24px 70px rgba(0,0,0,.16)}
+.relai-palette-backdrop.relai-light .relai-palette-input-wrap{border-bottom-color:rgba(0,0,0,.08)}.relai-palette-backdrop.relai-light .relai-palette-input{color:#202020}.relai-palette-backdrop.relai-light .relai-palette-input-wrap kbd{border-color:rgba(0,0,0,.1);background:#f2f2f2;color:#777}.relai-palette-backdrop.relai-light .relai-palette-row:hover,.relai-palette-backdrop.relai-light .relai-palette-row[data-selected="true"]{background:#f3f3f3}.relai-palette-backdrop.relai-light .relai-palette-footer{border-top-color:rgba(0,0,0,.08)}
+.relai-health-notice.relai-light{border-color:rgba(0,0,0,.11);background:#fff;color:#222;box-shadow:0 10px 30px rgba(0,0,0,.14)}.relai-health-notice.relai-light>span{color:#666}.relai-health-notice.relai-light .relai-health-actions button{border-color:rgba(0,0,0,.12);background:#f2f2f2;color:#222}.relai-health-notice.relai-light .relai-health-actions button:first-child{border-color:#0d8fe8;background:#0d8fe8;color:#fff}
+
+@media(max-width:700px){.relai-palette-backdrop{padding-top:8vh}.relai-nav-preview{width:180px}.relai-health-notice{right:10px;bottom:10px;width:calc(100vw - 20px)}}
+@media(prefers-reduced-motion:reduce){.relai-palette-row,.relai-health-actions button{scroll-behavior:auto;transition:none!important}}
